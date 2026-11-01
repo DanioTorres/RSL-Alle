@@ -6,15 +6,16 @@ TAGE = 20  # abrufbare Stichtage
 OUT = "data_alle"
 UA = {"User-Agent": "Mozilla/5.0 rsl-dashboard"}
 SEC = {"Health Care": "Healthcare", "Information Technology": "Technology"}
-WIKI = [  # Index, Seite, Mindestzeilen, Ticker-Endung
-    ("S&P 500", "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies", 400, ""),
-    ("NASDAQ 100", "https://en.wikipedia.org/wiki/Nasdaq-100", 90, ""),
-    ("Dow Jones", "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average", 28, ""),
-    ("DAX", "https://en.wikipedia.org/wiki/DAX", 35, ".DE"),
-]
-LISTEN = [("STOXX 600", "listen/stoxx600.csv"), ("Russell 2000", "listen/russell2000.csv"), ("SSE Comp.", "listen/sse.csv")]
+URL_SP = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+URL_NDX = "https://en.wikipedia.org/wiki/Nasdaq-100"
+URL_DOW = "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
+URL_DAX = "https://en.wikipedia.org/wiki/DAX"
+# Eingebaute Reserveliste (Stand 2025) - nur falls Wikipedia nicht lesbar ist und keine listen/dow.csv existiert
+DOW = "AAPL AMGN AMZN AXP BA CAT CRM CSCO CVX DIS GS HD HON IBM JNJ JPM KO MCD MMM MRK MSFT NKE NVDA PG SHW TRV UNH V VZ WMT".split()
 KRYPTO = "BTC ETH BNB SOL XRP ADA DOGE AVAX TRX LINK DOT LTC BCH XLM ATOM ETC".split()
 ORDER = ["S&P 500", "NASDAQ 100", "Dow Jones", "DAX", "STOXX 600", "Russell 2000", "SSE Comp.", "Krypto"]
+FILES = {"S&P 500": "listen/sp500.csv", "NASDAQ 100": "listen/nasdaq100.csv", "Dow Jones": "listen/dow.csv", "DAX": "listen/dax.csv",
+         "STOXX 600": "listen/stoxx600.csv", "Russell 2000": "listen/russell2000.csv", "SSE Comp.": "listen/sse.csv"}
 
 def pick(cols, *keys):
     for k in keys:
@@ -49,33 +50,66 @@ def custom(path):
     return [(str(r[c[0]]).strip(), str(r[c[1]]).strip() if len(c) > 1 else str(r[c[0]]),
              str(r[c[2]]).strip() if len(c) > 2 else "Sonstige") for _, r in df.iterrows() if str(r[c[0]]).strip()]
 
+def nasdaq_api():
+    r = requests.get("https://api.nasdaq.com/api/quote/list-type/nasdaq100", headers={**UA, "Accept": "application/json"}, timeout=30)
+    r.raise_for_status()
+    rows = r.json()["data"]["data"]["rows"]
+    return [(x["symbol"], x.get("companyName", x["symbol"]), "Sonstige") for x in rows]
+
+def src_sp():
+    return wiki(URL_SP, 400)
+
+def src_ndx():
+    try:
+        return wiki(URL_NDX, 90)
+    except Exception as e:
+        print("NASDAQ 100 Wikipedia:", e, "-> versuche Nasdaq-API")
+    return nasdaq_api()
+
+def src_dow():
+    try:
+        return wiki(URL_DOW, 28)
+    except Exception as e:
+        print("Dow Wikipedia:", e, "-> eingebaute Liste (Stand 2025)")
+    return [(t, t, "Sonstige") for t in DOW]
+
+def src_dax():
+    return wiki(URL_DAX, 35)
+
+AUTO = {"S&P 500": (src_sp, "us"), "NASDAQ 100": (src_ndx, "us"), "Dow Jones": (src_dow, "us"), "DAX": (src_dax, "de")}
+
 def collect():
     info = {}  # ticker -> {"n","sec","ix"}
-    def add(index, items, suffix=""):
+    def add(index, items, mode):
         for tk, n, sec in items:
-            tk = tk.split()[0].replace(".", "-") if not suffix else tk.split()[0]
-            if suffix and not tk.upper().endswith(suffix):
-                tk += suffix
+            tk = tk.strip().split()[0] if tk.strip() else ""
+            if not tk:
+                continue
+            if mode == "us":
+                tk = tk.replace(".", "-")
+            elif mode == "de" and "." not in tk:
+                tk += ".DE"
             tk = tk.upper()
             d = info.setdefault(tk, {"n": n, "sec": SEC.get(sec, sec) or "Sonstige", "ix": []})
             if index not in d["ix"]:
                 d["ix"].append(index)
-    for index, url, mn, suf in WIKI:
+    for index in ORDER:
+        if index == "Krypto":
+            continue
+        path = FILES[index]
         try:
-            add(index, wiki(url, mn), suf)
-            print(index, "ok")
+            if os.path.exists(path):
+                add(index, custom(path), "raw")
+                print(index, "ok (aus", path + ")")
+            elif index in AUTO:
+                fn, mode = AUTO[index]
+                add(index, fn(), mode)
+                print(index, "ok")
+            else:
+                print(index, "uebersprungen (keine", path + ")")
         except Exception as e:
             print("FEHLER", index, e)
-    for index, path in LISTEN:
-        if os.path.exists(path):
-            try:
-                add(index, custom(path))
-                print(index, "ok (Liste)")
-            except Exception as e:
-                print("FEHLER", index, e)
-        else:
-            print(index, "uebersprungen (keine", path + ")")
-    add("Krypto", [(c + "-USD", c, "Krypto") for c in KRYPTO])
+    add("Krypto", [(c + "-USD", c, "Krypto") for c in KRYPTO], "raw")
     return info
 
 def download(chunk):
