@@ -5,7 +5,11 @@ import pandas as pd, requests, yfinance as yf
 TAGE = 20  # abrufbare Stichtage
 OUT = "data_alle"
 UA = {"User-Agent": "Mozilla/5.0 rsl-dashboard"}
-SEC = {"Health Care": "Healthcare", "Information Technology": "Technology"}
+SEC = {"Health Care": "Healthcare", "Information Technology": "Technology", "Communication": "Communication Services",
+       "Finanzwesen": "Financials", "Gesundheitsversorgung": "Healthcare", "IT": "Technology",
+       "Nichtzyklische Konsumgüter": "Consumer Staples", "Zyklische Konsumgüter": "Consumer Discretionary",
+       "Energie": "Energy", "Materialien": "Materials", "Versorger": "Utilities", "Kommunikation": "Communication Services",
+       "Industrie": "Industrials", "Immobilien": "Real Estate"}
 URL_SP = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 URL_NDX = "https://en.wikipedia.org/wiki/Nasdaq-100"
 URL_DOW = "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
@@ -73,15 +77,94 @@ def src_dow():
         print("Dow Wikipedia:", e, "-> eingebaute Liste (Stand 2025)")
     return [(t, t, "Sonstige") for t in DOW]
 
+URL_IWM = "https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/latest-holdings.csv"
+URLS_STOXX = [
+    "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/latest-holdings.csv",
+    "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/1478358465952.ajax?fileType=csv&fileName=EXSA_holdings&dataType=fund",
+    "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/1478358465952.ajax?filetype=csv&filename=exsa_holdings&datatype=fund",
+]
+BROWSER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36", "Accept": "text/csv,*/*"}
+EXCH = [("xetra", ".DE"), ("frankfurt", ".DE"), ("paris", ".PA"), ("amsterdam", ".AS"), ("brussels", ".BR"), ("lisbon", ".LS"),
+        ("madrid", ".MC"), ("bolsa", ".MC"), ("milan", ".MI"), ("borsa italiana", ".MI"), ("swiss", ".SW"), ("six", ".SW"),
+        ("london", ".L"), ("stockholm", ".ST"), ("copenhagen", ".CO"), ("helsinki", ".HE"), ("oslo", ".OL"), ("vienna", ".VI"),
+        ("wien", ".VI"), ("dublin", ".IR"), ("irish", ".IR"), ("warsaw", ".WA"), ("athens", ".AT")]
+CTRY = {"GB": ".L", "CH": ".SW", "DE": ".DE", "FR": ".PA", "NL": ".AS", "ES": ".MC", "IT": ".MI", "SE": ".ST", "DK": ".CO",
+        "FI": ".HE", "NO": ".OL", "BE": ".BR", "PT": ".LS", "AT": ".VI", "IE": ".IR", "PL": ".WA", "GR": ".AT", "LU": ".PA",
+        "JE": ".L", "GG": ".L"}
+
+def get_csv(url):
+    r = requests.get(url, headers=BROWSER, timeout=60)
+    r.raise_for_status()
+    text = r.content.decode("utf-8-sig", errors="replace")
+    lines = text.splitlines()
+    for i, l in enumerate(lines):
+        low = l.lower().replace('"', "")
+        if low.startswith(("ticker,", "emittententicker", "issuer ticker", "ticker;")):
+            return pd.read_csv(io.StringIO("\n".join(lines[i:])), sep=None, engine="python", dtype=str).fillna("")
+    raise ValueError("keine Kopfzeile gefunden")
+
+def src_russell():
+    df = get_csv(URL_IWM)
+    cols = list(df.columns)
+    ac, sc, nm = pick(cols, "asset class"), pick(cols, "sector"), pick(cols, "name")
+    out = []
+    for _, r in df.iterrows():
+        if ac and r[ac].strip().lower() != "equity":
+            continue
+        tk = r[cols[0]].strip().replace(" ", "-")
+        if tk and tk != "-":
+            out.append((tk, r[nm] if nm else tk, r[sc] if sc else "Sonstige"))
+    if len(out) < 1500:
+        raise ValueError("nur %d Zeilen" % len(out))
+    return out
+
+def yahoo_ticker(t, exch, isin):
+    t = t.strip().upper().replace(" ", "-")
+    if t.endswith("/"):
+        t = t[:-1]
+    t = t.replace("/", "-")
+    low = (exch or "").lower()
+    for key, suf in EXCH:
+        if key in low:
+            return t + suf
+    return t + CTRY.get((isin or "")[:2].upper(), "")
+
+def src_stoxx():
+    last = None
+    for url in URLS_STOXX:
+        try:
+            df = get_csv(url)
+            cols = list(df.columns)
+            ac, sc, nm = pick(cols, "asset class", "anlageklasse"), pick(cols, "sector", "sektor"), pick(cols, "name")
+            ex, isn = pick(cols, "exchange", "börse", "borse"), pick(cols, "isin")
+            out = []
+            for _, r in df.iterrows():
+                if ac and r[ac].strip().lower() not in ("equity", "aktien"):
+                    continue
+                isin = r[isn].strip() if isn else ""
+                tk = r[cols[0]].strip()
+                if not tk or tk == "-":
+                    continue
+                out.append((yahoo_ticker(tk, r[ex] if ex else "", isin), r[nm] if nm else tk, r[sc] if sc else "Sonstige", isin))
+            if len(out) >= 300:
+                print("STOXX 600: %d Zeilen von %s" % (len(out), url[:90]))
+                return out
+            last = "nur %d Zeilen" % len(out)
+        except Exception as e:
+            last = e
+            print("STOXX 600 URL fehlgeschlagen:", str(e)[:100])
+    raise ValueError(last)
+
 def src_dax():
     return wiki(URL_DAX, 35)
 
-AUTO = {"S&P 500": (src_sp, "us"), "NASDAQ 100": (src_ndx, "us"), "Dow Jones": (src_dow, "us"), "DAX": (src_dax, "de")}
+AUTO = {"S&P 500": (src_sp, "us"), "NASDAQ 100": (src_ndx, "us"), "Dow Jones": (src_dow, "us"), "DAX": (src_dax, "de"), "Russell 2000": (src_russell, "raw"), "STOXX 600": (src_stoxx, "raw")}
 
 def collect():
     info = {}  # ticker -> {"n","sec","ix"}
     def add(index, items, mode):
-        for tk, n, sec in items:
+        for item in items:
+            tk, n, sec = item[:3]
             tk = tk.strip().split()[0] if tk.strip() else ""
             if not tk:
                 continue
@@ -91,6 +174,8 @@ def collect():
                 tk += ".DE"
             tk = tk.upper()
             d = info.setdefault(tk, {"n": n, "sec": SEC.get(sec, sec) or "Sonstige", "ix": []})
+            if len(item) > 3 and item[3]:
+                d["isin"] = item[3]
             if index not in d["ix"]:
                 d["ix"].append(index)
     for index in ORDER:
@@ -124,6 +209,37 @@ def download(chunk):
             time.sleep(5)
     return None
 
+def resolve_isin(isin):
+    try:
+        r = requests.get("https://query2.finance.yahoo.com/v1/finance/search", params={"q": isin, "quotesCount": 6, "newsCount": 0},
+                         headers=BROWSER, timeout=20)
+        qs = [q for q in r.json().get("quotes", []) if q.get("quoteType") == "EQUITY" and q.get("symbol")]
+        return qs[0]["symbol"] if qs else None
+    except Exception:
+        return None
+
+def repair_missing(px, info):
+    miss = [tk for tk, d in info.items() if d.get("isin") and (tk not in px.columns or px[tk].notna().sum() < 100)]
+    print(len(miss), "Ticker mit ISIN ohne Kurse - suche Yahoo-Symbol ueber ISIN")
+    mapping = {}
+    for tk in miss[:250]:
+        sym = resolve_isin(info[tk]["isin"])
+        if sym and sym != tk and sym not in info:
+            mapping[sym] = tk
+        time.sleep(0.25)
+    if mapping:
+        syms = list(mapping)
+        new = [f for f in (download(syms[i:i + 100]) for i in range(0, len(syms), 100)) if f is not None]
+        if new:
+            add = pd.concat(new, axis=1)
+            add = add.loc[:, ~add.columns.duplicated()].rename(columns=mapping)
+            add.index = pd.to_datetime(add.index).tz_localize(None)
+            px = pd.concat([px.drop(columns=[c for c in add.columns if c in px.columns]), add], axis=1)
+            print(len(mapping), "per ISIN gefunden")
+    left = [tk for tk in miss if tk not in px.columns or px[tk].notna().sum() < 100]
+    print("weiterhin ohne Kurse:", len(left), left[:20])
+    return px
+
 def takeover_flags(ret, d):
     w = ret.loc[:d].tail(120)
     arr = w.to_numpy(dtype=float)
@@ -146,6 +262,7 @@ def main():
     px = pd.concat(frames, axis=1)
     px = px.loc[:, ~px.columns.duplicated()]
     px.index = pd.to_datetime(px.index).tz_localize(None)
+    px = repair_missing(px, info)
     now = datetime.datetime.utcnow()
     if now.weekday() < 5 and now.hour * 60 + now.minute < 21 * 60 + 15:
         px = px[px.index < pd.Timestamp(now.date())]
@@ -182,6 +299,10 @@ def main():
             if tk in flags:
                 row["ue"] = flags[tk]
             rows.append(row)
+        if d == days[-1]:
+            from collections import Counter
+            cnt = Counter(i for r in rows for i in r["ix"])
+            print("Aktien je Index:", dict(cnt))
         if len(rows) < 300:
             print("Zu wenige Aktien am", d.date())
             continue
