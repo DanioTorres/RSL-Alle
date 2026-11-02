@@ -111,14 +111,38 @@ def src_russell():
         out.append((tk.replace(" ", "-").replace(".", "-"), r[c_n].strip(), r[c_s].strip() or "Sonstige"))
     return out
 
-def cands(tk, isin, cur):
-    c = CUR.get(cur, []) + COUNTRY.get(isin[:2], []) + FALL
-    seen, res = set(), []
-    for s in c:
-        if s not in seen:
-            seen.add(s)
+EXCH = [("xetra", ".DE"), ("deutsche b", ".DE"), ("frankfurt", ".DE"), ("london", ".L"), ("paris", ".PA"), ("amsterdam", ".AS"),
+        ("br\u00fcssel", ".BR"), ("brussels", ".BR"), ("lissabon", ".LS"), ("lisbon", ".LS"), ("dublin", ".IR"), ("irish", ".IR"),
+        ("swiss", ".SW"), ("six ", ".SW"), ("z\u00fcrich", ".SW"), ("mailand", ".MI"), ("milan", ".MI"), ("borsa italiana", ".MI"),
+        ("madrid", ".MC"), ("bolsa", ".MC"), ("stockholm", ".ST"), ("kopenhagen", ".CO"), ("copenhagen", ".CO"), ("oslo", ".OL"),
+        ("helsinki", ".HE"), ("wien", ".VI"), ("vienna", ".VI"), ("warschau", ".WA"), ("warsaw", ".WA"), ("athen", ".AT"), ("athens", ".AT")]
+LAND = [("vereinigtes k", ".L"), ("united kingdom", ".L"), ("gro\u00dfbritannien", ".L"), ("jersey", ".L"), ("guernsey", ".L"),
+        ("frankreich", ".PA"), ("france", ".PA"), ("deutschland", ".DE"), ("germany", ".DE"), ("niederlande", ".AS"), ("netherlands", ".AS"),
+        ("schweiz", ".SW"), ("switzerland", ".SW"), ("spanien", ".MC"), ("spain", ".MC"), ("italien", ".MI"), ("italy", ".MI"),
+        ("schweden", ".ST"), ("sweden", ".ST"), ("d\u00e4nemark", ".CO"), ("denmark", ".CO"), ("norwegen", ".OL"), ("norway", ".OL"),
+        ("finnland", ".HE"), ("finland", ".HE"), ("belgien", ".BR"), ("belgium", ".BR"), ("portugal", ".LS"), ("\u00f6sterreich", ".VI"),
+        ("austria", ".VI"), ("irland", ".IR"), ("ireland", ".IR"), ("luxemb", ".PA"), ("polen", ".WA"), ("poland", ".WA"),
+        ("griechenland", ".AT"), ("greece", ".AT")]
+FALL_ALL = [".L", ".DE", ".PA", ".AS", ".SW", ".MI", ".MC", ".ST", ".CO", ".OL", ".HE", ".BR", ".LS", ".VI"]
+
+def first_hit(text, table):
+    t = text.lower()
+    for k, v in table:
+        if k in t:
+            return v
+    return None
+
+def cands(exch, land, isin, cur):
+    """Reihenfolge der Boersen-Endungen: Boerse > ISIN-Land > Standort > Waehrung. Nur wenn nichts bekannt ist: alle durchprobieren."""
+    res = []
+    for s in ([first_hit(exch, EXCH)] + COUNTRY.get(isin[:2].upper(), []) + [first_hit(land, LAND)]):
+        if s and s not in res:
             res.append(s)
-    return res[:MAXPASS]
+    if not res:
+        for s in CUR.get(cur, []) + FALL_ALL:
+            if s not in res:
+                res.append(s)
+    return res
 
 def local_symbol(tk):
     t = tk.strip().upper().rstrip(".")
@@ -126,9 +150,16 @@ def local_symbol(tk):
 
 def src_stoxx():
     df = ishares_csv(URLS_STOXX, 400)
-    c_t, c_n, c_s = pick(df.columns, "ticker"), pick(df.columns, "name"), pick(df.columns, "sektor", "sector")
-    c_a, c_i = pick(df.columns, "anlageklasse", "asset class"), pick(df.columns, "isin")
-    c_c = pick(df.columns, "marktw", "market curr")
+    cols = list(df.columns)
+    print("   STOXX-Datei, Spalten:", cols)
+    c_t, c_n, c_s = pick(cols, "ticker"), pick(cols, "name"), pick(cols, "sektor", "sector")
+    c_a, c_i = pick(cols, "anlageklasse", "asset class"), pick(cols, "isin")
+    c_e, c_l = pick(cols, "b\u00f6rse", "exchange", "handelsplatz"), pick(cols, "standort", "location", "country")
+    c_c = pick(cols, "marktw\u00e4hr", "market curr", "w\u00e4hrung", "currency")
+    print("   erkannt: Ticker=%s Boerse=%s Standort=%s ISIN=%s Waehrung=%s" % (c_t, c_e, c_l, c_i, c_c))
+    if not (c_e or c_l or c_i):
+        raise ValueError("keine Boersen-, Standort- oder ISIN-Spalte gefunden - STOXX 600 wird NICHT aufgenommen, "
+                         "damit keine falschen Ticker zugeordnet werden. Bitte die Zeile 'Spalten:' oben pruefen.")
     out = []
     for _, r in df.iterrows():
         if c_a and r[c_a].strip().lower() not in ("aktien", "equity"):
@@ -136,10 +167,11 @@ def src_stoxx():
         tk = r[c_t].strip()
         if not tk or tk == "-":
             continue
-        isin = r[c_i].strip() if c_i else ""
-        cur = r[c_c].strip().upper() if c_c else ""
-        out.append({"tk": local_symbol(tk), "n": r[c_n].strip(), "sec": r[c_s].strip() or "Sonstige",
-                    "cands": cands(tk, isin, cur), "ok": False})
+        g = lambda c: r[c].strip() if c else ""
+        out.append({"tk": local_symbol(tk), "n": g(c_n), "sec": g(c_s) or "Sonstige",
+                    "cands": cands(g(c_e), g(c_l), g(c_i), g(c_c).upper()), "ok": False})
+    for h in out[:3]:
+        print("   Beispiel:", h["tk"], h["n"], h["cands"])
     return out
 
 def nasdaq_api():
@@ -252,7 +284,7 @@ def main():
     print(len(tickers), "Ticker (ohne STOXX-Zuordnung)")
     frames = [bulk(tickers)] if tickers else []
     # STOXX 600: Boersen-Endung durch Ausprobieren finden
-    for rank in range(MAXPASS):
+    for rank in range(max([len(h["cands"]) for h in pending] or [0])):
         todo = [h for h in pending if not h["ok"] and rank < len(h["cands"])]
         if not todo:
             break
@@ -274,6 +306,10 @@ def main():
         frames.append(df[keep])
         print(f"STOXX 600 Durchgang {rank + 1}: {len(keep)} Ticker zugeordnet")
     miss = [h["n"] for h in pending if not h["ok"]]
+    if pending:
+        from collections import Counter
+        used = Counter(k[k.rfind("."):] if "." in k else "(keine)" for k, v in info.items() if "STOXX 600" in v["ix"])
+        print("STOXX 600 nach Boerse:", dict(used))
     if pending:
         print(f"STOXX 600: {len(pending) - len(miss)} von {len(pending)} zugeordnet. Nicht gefunden (Auszug):", miss[:25])
     px = pd.concat([f for f in frames if f is not None], axis=1)
