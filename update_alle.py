@@ -4,22 +4,40 @@ import pandas as pd, requests, yfinance as yf
 
 TAGE = 20  # abrufbare Stichtage
 OUT = "data_alle"
-UA = {"User-Agent": "Mozilla/5.0 rsl-dashboard"}
+UA = {"User-Agent": "Mozilla/5.0 (compatible; rsl-dashboard)"}
 SEC = {"Health Care": "Healthcare", "Information Technology": "Technology", "Communication": "Communication Services",
-       "Finanzwesen": "Financials", "Gesundheitsversorgung": "Healthcare", "IT": "Technology",
-       "Nichtzyklische Konsumgüter": "Consumer Staples", "Zyklische Konsumgüter": "Consumer Discretionary",
-       "Energie": "Energy", "Materialien": "Materials", "Versorger": "Utilities", "Kommunikation": "Communication Services",
-       "Industrie": "Industrials", "Immobilien": "Real Estate"}
+       "IT": "Technology", "Finanzwesen": "Financials", "Gesundheitsversorgung": "Healthcare", "Industrie": "Industrials",
+       "Nichtzyklische Konsumgüter": "Consumer Staples", "Zyklische Konsumgüter": "Consumer Discretionary", "Energie": "Energy",
+       "Materialien": "Materials", "Versorger": "Utilities", "Kommunikation": "Communication Services", "Immobilien": "Real Estate"}
 URL_SP = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 URL_NDX = "https://en.wikipedia.org/wiki/Nasdaq-100"
 URL_DOW = "https://en.wikipedia.org/wiki/Dow_Jones_Industrial_Average"
 URL_DAX = "https://en.wikipedia.org/wiki/DAX"
+# iShares-Bestandslisten (ETF-Holdings als Ersatz fuer die Index-Mitglieder)
+URLS_RUSSELL = [
+    "https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/latest-holdings.csv",
+    "https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/1467271812596.ajax?fileType=csv&fileName=IWM_holdings&dataType=fund",
+    "https://www.ishares.com/ch/professionelle-anleger/de/produkte/239710/ishares-russell-2000-etf/1495092304805.ajax?fileType=csv&fileName=IWM_holdings&dataType=fund",
+]
+URLS_STOXX = [
+    "https://www.ishares.com/ch/professionelle-anleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/1495092304805.ajax?fileType=csv&fileName=EXSA_holdings&dataType=fund",
+    "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/1478358465952.ajax?fileType=csv&fileName=EXSA_holdings&dataType=fund",
+    "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/latest-holdings.csv",
+]
 # Eingebaute Reserveliste (Stand 2025) - nur falls Wikipedia nicht lesbar ist und keine listen/dow.csv existiert
 DOW = "AAPL AMGN AMZN AXP BA CAT CRM CSCO CVX DIS GS HD HON IBM JNJ JPM KO MCD MMM MRK MSFT NKE NVDA PG SHW TRV UNH V VZ WMT".split()
 KRYPTO = "BTC ETH BNB SOL XRP ADA DOGE AVAX TRX LINK DOT LTC BCH XLM ATOM ETC".split()
 ORDER = ["S&P 500", "NASDAQ 100", "Dow Jones", "DAX", "STOXX 600", "Russell 2000", "SSE Comp.", "Krypto"]
 FILES = {"S&P 500": "listen/sp500.csv", "NASDAQ 100": "listen/nasdaq100.csv", "Dow Jones": "listen/dow.csv", "DAX": "listen/dax.csv",
          "STOXX 600": "listen/stoxx600.csv", "Russell 2000": "listen/russell2000.csv", "SSE Comp.": "listen/sse.csv"}
+# Boersen-Endungen fuer europaeische Ticker (Waehrung / ISIN-Land -> Yahoo-Suffix)
+CUR = {"GBP": [".L"], "GBX": [".L"], "CHF": [".SW"], "SEK": [".ST"], "DKK": [".CO"], "NOK": [".OL"], "PLN": [".WA"], "USD": ["", ".L"]}
+COUNTRY = {"GB": [".L", ".AS"], "JE": [".L"], "GG": [".L"], "IM": [".L"], "BM": [".L"], "IE": [".IR", ".L", ".AS"],
+           "NL": [".AS", ".PA", ".BR"], "FR": [".PA"], "DE": [".DE"], "CH": [".SW"], "ES": [".MC"], "IT": [".MI"],
+           "SE": [".ST"], "DK": [".CO"], "NO": [".OL"], "FI": [".HE"], "BE": [".BR", ".AS", ".PA"], "PT": [".LS"],
+           "AT": [".VI"], "LU": [".PA", ".AS", ".DE", ".L"], "PL": [".WA"], "GR": [".AT"]}
+FALL = [".L", ".DE", ".PA", ".AS", ".SW", ".MI", ".MC", ".ST"]
+MAXPASS = 5
 
 def pick(cols, *keys):
     for k in keys:
@@ -54,6 +72,76 @@ def custom(path):
     return [(str(r[c[0]]).strip(), str(r[c[1]]).strip() if len(c) > 1 else str(r[c[0]]),
              str(r[c[2]]).strip() if len(c) > 2 else "Sonstige") for _, r in df.iterrows() if str(r[c[0]]).strip()]
 
+def ishares_csv(urls, minrows):
+    """Laedt eine iShares-Bestandsliste (CSV mit Vorspann), probiert mehrere Adressen."""
+    last = "keine Adresse"
+    for u in urls:
+        try:
+            r = requests.get(u, headers=UA, timeout=90)
+            r.raise_for_status()
+            lines = r.content.decode("utf-8-sig", errors="replace").splitlines()
+            head = None
+            for i, l in enumerate(lines[:40]):
+                low = l.lower().replace('"', "")
+                if low.startswith(("ticker,", "emittententicker,", "issuer ticker,")):
+                    head = i
+                    break
+            if head is None:
+                raise ValueError("Kopfzeile nicht gefunden (kein CSV?)")
+            df = pd.read_csv(io.StringIO("\n".join(lines[head:])), dtype=str, on_bad_lines="skip").fillna("")
+            if len(df) < minrows:
+                raise ValueError(f"nur {len(df)} Zeilen")
+            return df
+        except Exception as e:
+            last = f"{u[:70]}... -> {e}"
+            print("   iShares-Adresse fehlgeschlagen:", last)
+    raise ValueError(last)
+
+def src_russell():
+    df = ishares_csv(URLS_RUSSELL, 1000)
+    c_t, c_n, c_s = pick(df.columns, "ticker"), pick(df.columns, "name"), pick(df.columns, "sector", "sektor")
+    c_a = pick(df.columns, "asset class", "anlageklasse")
+    out = []
+    for _, r in df.iterrows():
+        if c_a and r[c_a].strip().lower() not in ("equity", "aktien"):
+            continue
+        tk = r[c_t].strip().upper()
+        if not tk or tk in ("-", "USD"):
+            continue
+        out.append((tk.replace(" ", "-").replace(".", "-"), r[c_n].strip(), r[c_s].strip() or "Sonstige"))
+    return out
+
+def cands(tk, isin, cur):
+    c = CUR.get(cur, []) + COUNTRY.get(isin[:2], []) + FALL
+    seen, res = set(), []
+    for s in c:
+        if s not in seen:
+            seen.add(s)
+            res.append(s)
+    return res[:MAXPASS]
+
+def local_symbol(tk):
+    t = tk.strip().upper().rstrip(".")
+    return t.replace(" ", "-").replace(".", "-")
+
+def src_stoxx():
+    df = ishares_csv(URLS_STOXX, 400)
+    c_t, c_n, c_s = pick(df.columns, "ticker"), pick(df.columns, "name"), pick(df.columns, "sektor", "sector")
+    c_a, c_i = pick(df.columns, "anlageklasse", "asset class"), pick(df.columns, "isin")
+    c_c = pick(df.columns, "marktw", "market curr")
+    out = []
+    for _, r in df.iterrows():
+        if c_a and r[c_a].strip().lower() not in ("aktien", "equity"):
+            continue
+        tk = r[c_t].strip()
+        if not tk or tk == "-":
+            continue
+        isin = r[c_i].strip() if c_i else ""
+        cur = r[c_c].strip().upper() if c_c else ""
+        out.append({"tk": local_symbol(tk), "n": r[c_n].strip(), "sec": r[c_s].strip() or "Sonstige",
+                    "cands": cands(tk, isin, cur), "ok": False})
+    return out
+
 def nasdaq_api():
     r = requests.get("https://api.nasdaq.com/api/quote/list-type/nasdaq100", headers={**UA, "Accept": "application/json"}, timeout=30)
     r.raise_for_status()
@@ -77,94 +165,16 @@ def src_dow():
         print("Dow Wikipedia:", e, "-> eingebaute Liste (Stand 2025)")
     return [(t, t, "Sonstige") for t in DOW]
 
-URL_IWM = "https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/latest-holdings.csv"
-URLS_STOXX = [
-    "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/latest-holdings.csv",
-    "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/1478358465952.ajax?fileType=csv&fileName=EXSA_holdings&dataType=fund",
-    "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/1478358465952.ajax?filetype=csv&filename=exsa_holdings&datatype=fund",
-]
-BROWSER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36", "Accept": "text/csv,*/*"}
-EXCH = [("xetra", ".DE"), ("frankfurt", ".DE"), ("paris", ".PA"), ("amsterdam", ".AS"), ("brussels", ".BR"), ("lisbon", ".LS"),
-        ("madrid", ".MC"), ("bolsa", ".MC"), ("milan", ".MI"), ("borsa italiana", ".MI"), ("swiss", ".SW"), ("six", ".SW"),
-        ("london", ".L"), ("stockholm", ".ST"), ("copenhagen", ".CO"), ("helsinki", ".HE"), ("oslo", ".OL"), ("vienna", ".VI"),
-        ("wien", ".VI"), ("dublin", ".IR"), ("irish", ".IR"), ("warsaw", ".WA"), ("athens", ".AT")]
-CTRY = {"GB": ".L", "CH": ".SW", "DE": ".DE", "FR": ".PA", "NL": ".AS", "ES": ".MC", "IT": ".MI", "SE": ".ST", "DK": ".CO",
-        "FI": ".HE", "NO": ".OL", "BE": ".BR", "PT": ".LS", "AT": ".VI", "IE": ".IR", "PL": ".WA", "GR": ".AT", "LU": ".PA",
-        "JE": ".L", "GG": ".L"}
-
-def get_csv(url):
-    r = requests.get(url, headers=BROWSER, timeout=60)
-    r.raise_for_status()
-    text = r.content.decode("utf-8-sig", errors="replace")
-    lines = text.splitlines()
-    for i, l in enumerate(lines):
-        low = l.lower().replace('"', "")
-        if low.startswith(("ticker,", "emittententicker", "issuer ticker", "ticker;")):
-            return pd.read_csv(io.StringIO("\n".join(lines[i:])), sep=None, engine="python", dtype=str).fillna("")
-    raise ValueError("keine Kopfzeile gefunden")
-
-def src_russell():
-    df = get_csv(URL_IWM)
-    cols = list(df.columns)
-    ac, sc, nm = pick(cols, "asset class"), pick(cols, "sector"), pick(cols, "name")
-    out = []
-    for _, r in df.iterrows():
-        if ac and r[ac].strip().lower() != "equity":
-            continue
-        tk = r[cols[0]].strip().replace(" ", "-")
-        if tk and tk != "-":
-            out.append((tk, r[nm] if nm else tk, r[sc] if sc else "Sonstige"))
-    if len(out) < 1500:
-        raise ValueError("nur %d Zeilen" % len(out))
-    return out
-
-def yahoo_ticker(t, exch, isin):
-    t = t.strip().upper().replace(" ", "-")
-    if t.endswith("/"):
-        t = t[:-1]
-    t = t.replace("/", "-")
-    low = (exch or "").lower()
-    for key, suf in EXCH:
-        if key in low:
-            return t + suf
-    return t + CTRY.get((isin or "")[:2].upper(), "")
-
-def src_stoxx():
-    last = None
-    for url in URLS_STOXX:
-        try:
-            df = get_csv(url)
-            cols = list(df.columns)
-            ac, sc, nm = pick(cols, "asset class", "anlageklasse"), pick(cols, "sector", "sektor"), pick(cols, "name")
-            ex, isn = pick(cols, "exchange", "börse", "borse"), pick(cols, "isin")
-            out = []
-            for _, r in df.iterrows():
-                if ac and r[ac].strip().lower() not in ("equity", "aktien"):
-                    continue
-                isin = r[isn].strip() if isn else ""
-                tk = r[cols[0]].strip()
-                if not tk or tk == "-":
-                    continue
-                out.append((yahoo_ticker(tk, r[ex] if ex else "", isin), r[nm] if nm else tk, r[sc] if sc else "Sonstige", isin))
-            if len(out) >= 300:
-                print("STOXX 600: %d Zeilen von %s" % (len(out), url[:90]))
-                return out
-            last = "nur %d Zeilen" % len(out)
-        except Exception as e:
-            last = e
-            print("STOXX 600 URL fehlgeschlagen:", str(e)[:100])
-    raise ValueError(last)
-
 def src_dax():
     return wiki(URL_DAX, 35)
 
-AUTO = {"S&P 500": (src_sp, "us"), "NASDAQ 100": (src_ndx, "us"), "Dow Jones": (src_dow, "us"), "DAX": (src_dax, "de"), "Russell 2000": (src_russell, "raw"), "STOXX 600": (src_stoxx, "raw")}
+AUTO = {"S&P 500": (src_sp, "us"), "NASDAQ 100": (src_ndx, "us"), "Dow Jones": (src_dow, "us"),
+        "DAX": (src_dax, "de"), "Russell 2000": (src_russell, "raw")}
 
 def collect():
-    info = {}  # ticker -> {"n","sec","ix"}
+    info, pending = {}, []  # info: ticker -> {"n","sec","ix"}
     def add(index, items, mode):
-        for item in items:
-            tk, n, sec = item[:3]
+        for tk, n, sec in items:
             tk = tk.strip().split()[0] if tk.strip() else ""
             if not tk:
                 continue
@@ -173,13 +183,12 @@ def collect():
             elif mode == "de" and "." not in tk:
                 tk += ".DE"
             tk = tk.upper()
-            d = info.setdefault(tk, {"n": n, "sec": SEC.get(sec, sec) or "Sonstige", "ix": []})
-            if len(item) > 3 and item[3]:
-                d["isin"] = item[3]
+            sec = SEC.get(sec.strip(), sec.strip()) or "Sonstige"
+            d = info.setdefault(tk, {"n": n, "sec": sec, "ix": []})
             if index not in d["ix"]:
                 d["ix"].append(index)
     for index in ORDER:
-        if index == "Krypto":
+        if index in ("Krypto", "STOXX 600"):
             continue
         path = FILES[index]
         try:
@@ -194,8 +203,17 @@ def collect():
                 print(index, "uebersprungen (keine", path + ")")
         except Exception as e:
             print("FEHLER", index, e)
+    try:
+        if os.path.exists(FILES["STOXX 600"]):
+            add("STOXX 600", custom(FILES["STOXX 600"]), "raw")
+            print("STOXX 600 ok (aus", FILES["STOXX 600"] + ")")
+        else:
+            pending = src_stoxx()
+            print("STOXX 600:", len(pending), "Positionen gelesen (Ticker werden gleich zugeordnet)")
+    except Exception as e:
+        print("FEHLER STOXX 600", e)
     add("Krypto", [(c + "-USD", c, "Krypto") for c in KRYPTO], "raw")
-    return info
+    return info, pending
 
 def download(chunk):
     for _ in range(3):
@@ -209,36 +227,10 @@ def download(chunk):
             time.sleep(5)
     return None
 
-def resolve_isin(isin):
-    try:
-        r = requests.get("https://query2.finance.yahoo.com/v1/finance/search", params={"q": isin, "quotesCount": 6, "newsCount": 0},
-                         headers=BROWSER, timeout=20)
-        qs = [q for q in r.json().get("quotes", []) if q.get("quoteType") == "EQUITY" and q.get("symbol")]
-        return qs[0]["symbol"] if qs else None
-    except Exception:
-        return None
-
-def repair_missing(px, info):
-    miss = [tk for tk, d in info.items() if d.get("isin") and (tk not in px.columns or px[tk].notna().sum() < 100)]
-    print(len(miss), "Ticker mit ISIN ohne Kurse - suche Yahoo-Symbol ueber ISIN")
-    mapping = {}
-    for tk in miss[:250]:
-        sym = resolve_isin(info[tk]["isin"])
-        if sym and sym != tk and sym not in info:
-            mapping[sym] = tk
-        time.sleep(0.25)
-    if mapping:
-        syms = list(mapping)
-        new = [f for f in (download(syms[i:i + 100]) for i in range(0, len(syms), 100)) if f is not None]
-        if new:
-            add = pd.concat(new, axis=1)
-            add = add.loc[:, ~add.columns.duplicated()].rename(columns=mapping)
-            add.index = pd.to_datetime(add.index).tz_localize(None)
-            px = pd.concat([px.drop(columns=[c for c in add.columns if c in px.columns]), add], axis=1)
-            print(len(mapping), "per ISIN gefunden")
-    left = [tk for tk in miss if tk not in px.columns or px[tk].notna().sum() < 100]
-    print("weiterhin ohne Kurse:", len(left), left[:20])
-    return px
+def bulk(symbols):
+    frames = [f for f in (download(symbols[i:i + 100]) for i in range(0, len(symbols), 100)) if f is not None]
+    time.sleep(1)
+    return pd.concat(frames, axis=1) if frames else None
 
 def takeover_flags(ret, d):
     w = ret.loc[:d].tail(120)
@@ -255,14 +247,38 @@ def takeover_flags(ret, d):
     return out
 
 def main():
-    info = collect()
+    info, pending = collect()
     tickers = list(info)
-    print(len(tickers), "Ticker")
-    frames = [f for f in (download(tickers[i:i + 100]) for i in range(0, len(tickers), 100)) if f is not None]
-    px = pd.concat(frames, axis=1)
+    print(len(tickers), "Ticker (ohne STOXX-Zuordnung)")
+    frames = [bulk(tickers)] if tickers else []
+    # STOXX 600: Boersen-Endung durch Ausprobieren finden
+    for rank in range(MAXPASS):
+        todo = [h for h in pending if not h["ok"] and rank < len(h["cands"])]
+        if not todo:
+            break
+        syms = {}
+        for h in todo:
+            syms.setdefault(h["tk"] + h["cands"][rank], []).append(h)
+        df = bulk(list(syms))
+        if df is None:
+            continue
+        keep = []
+        for s, hs in syms.items():
+            if s in df.columns and df[s].notna().sum() >= 60:
+                keep.append(s)
+                d = info.setdefault(s, {"n": hs[0]["n"], "sec": SEC.get(hs[0]["sec"], hs[0]["sec"]), "ix": []})
+                if "STOXX 600" not in d["ix"]:
+                    d["ix"].append("STOXX 600")
+                for h in hs:
+                    h["ok"] = True
+        frames.append(df[keep])
+        print(f"STOXX 600 Durchgang {rank + 1}: {len(keep)} Ticker zugeordnet")
+    miss = [h["n"] for h in pending if not h["ok"]]
+    if pending:
+        print(f"STOXX 600: {len(pending) - len(miss)} von {len(pending)} zugeordnet. Nicht gefunden (Auszug):", miss[:25])
+    px = pd.concat([f for f in frames if f is not None], axis=1)
     px = px.loc[:, ~px.columns.duplicated()]
     px.index = pd.to_datetime(px.index).tz_localize(None)
-    px = repair_missing(px, info)
     now = datetime.datetime.utcnow()
     if now.weekday() < 5 and now.hour * 60 + now.minute < 21 * 60 + 15:
         px = px[px.index < pd.Timestamp(now.date())]
@@ -299,10 +315,6 @@ def main():
             if tk in flags:
                 row["ue"] = flags[tk]
             rows.append(row)
-        if d == days[-1]:
-            from collections import Counter
-            cnt = Counter(i for r in rows for i in r["ix"])
-            print("Aktien je Index:", dict(cnt))
         if len(rows) < 300:
             print("Zu wenige Aktien am", d.date())
             continue
