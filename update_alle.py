@@ -390,9 +390,10 @@ def stoxx_events():
     print("   STOXX-Seiten abgefragt:", stats, ("| erster Fehler: " + err) if err else "")
     return events
 
-def tok_in(t, th):
-    """Wort kommt in der Wortmenge vor (auch als Wortanfang, z.B. TECH ~ TECHNOLOGIE)."""
-    return any(t == u or (len(t) >= 4 and u.startswith(t)) or (len(u) >= 4 and t.startswith(u)) for u in th)
+def tok_in(t, th, abbr=()):
+    """Wort kommt in der Wortmenge vor (auch als Wortanfang, z.B. TECH ~ TECHNOLOGIE; Abkuerzungen mit Punkt wie KON. ab 3 Buchstaben)."""
+    return any(t == u or (len(t) >= 4 and u.startswith(t)) or (len(u) >= 4 and t.startswith(u))
+               or (t in abbr and len(t) >= 3 and u.startswith(t)) for u in th)
 
 def ev_match(ev, h):
     te, th = norm_tokens(ev["name"]), norm_tokens(h["n"])
@@ -401,7 +402,8 @@ def ev_match(ev, h):
     same_code = re.sub(r"[^a-z0-9]", "", h["tk"].lower()) == ev["root"]
     if same_code and (te & th):
         return True  # gleicher Boersencode und mindestens ein gemeinsames Namenswort
-    hit = [t for t in te if tok_in(t, th)]
+    abbr = set(re.findall(r"([A-Z0-9]+)\.", ev["name"].upper()))
+    hit = [t for t in te if tok_in(t, th, abbr)]
     if len(hit) < len(te):
         # Toleranz: bei mind. 3 Woertern darf ein Wort fehlen (z.B. Zusatz "BSK"), wenn ein langes, unterscheidendes Wort passt
         if not (len(te) >= 3 and len(te) - len(hit) <= 1 and any(len(t) >= 6 for t in hit)):
@@ -454,38 +456,51 @@ RIC = {"L": ".L", "DE": ".DE", "PA": ".PA", "AS": ".AS", "S": ".SW", "MC": ".MC"
        "OL": ".OL", "HE": ".HE", "BR": ".BR", "LS": ".LS", "VI": ".VI", "WA": ".WA", "AT": ".AT", "I": ".IR", "IR": ".IR"}
 
 def ric_to_yahoo(code):
+    """Moegliche Yahoo-Symbole aus dem STOXX-Code (z.B. BAMNb.AS1 -> BAMNB.AS oder BAMN.AS)."""
     base, _, ex = code.partition(".")
     suf = RIC.get(re.sub(r"\d+$", "", ex).upper())
-    root = re.sub(r"[a-z]+$", "", base).upper()
-    return root + suf if suf and root else None
+    if not suf or not base:
+        return []
+    out = []
+    for root in (base.upper(), re.sub(r"[a-z]+$", "", base).upper()):
+        if root and root + suf not in out:
+            out.append(root + suf)
+    return out
 
 def add_missing(ev, info, frames):
     """Fehlende STOXX-Aufnahme ergaenzen: Yahoo-Symbol aus dem STOXX-Code ableiten, Kurse und Firmennamen pruefen."""
-    sym = ric_to_yahoo(ev.get("code", ""))
-    if not sym:
+    syms = ric_to_yahoo(ev.get("code", ""))
+    if not syms:
         print(f"   {ev['name']}: nicht ergaenzt (STOXX-Code {ev.get('code')!r} nicht umsetzbar)")
         return
-    if sym in info:
-        if "STOXX 600" not in info[sym]["ix"]:
-            info[sym]["ix"].append("STOXX 600")
-        print(f"   {ev['name']}: {sym} war schon vorhanden, jetzt auch dem STOXX 600 zugeordnet")
+    for sym in syms:
+        if sym in info:
+            if "STOXX 600" not in info[sym]["ix"]:
+                info[sym]["ix"].append("STOXX 600")
+            print(f"   {ev['name']}: {sym} war schon vorhanden, jetzt auch dem STOXX 600 zugeordnet")
+            return
+    why = ""
+    for sym in syms:
+        df = bulk([sym])
+        if df is None or sym not in df.columns or df[sym].notna().sum() < 60:
+            why = f"{sym} liefert bei Yahoo keine Kurse"
+            continue
+        try:
+            inf = yf.Ticker(sym).info or {}
+            yname = inf.get("longName") or inf.get("shortName") or ""
+        except Exception as e:
+            yname = ""
+            print(f"   {ev['name']}: Firmenname bei Yahoo nicht abrufbar ({type(e).__name__})")
+        abbr = set(re.findall(r"([A-Z0-9]+)\.", ev["name"].upper()))
+        th = norm_tokens(yname)
+        if not yname or not any(tok_in(t, th, abbr) for t in norm_tokens(ev["name"])):
+            why = f"Yahoo-Name {yname!r} passt nicht sicher zu {sym}"
+            continue
+        info[sym] = {"n": ev["name"], "sec": "Sonstige", "ix": ["STOXX 600"]}
+        frames.append(df[[sym]])
+        print(f"STOXX-Abgleich: {ev['name']} aus STOXX-Mitteilung ergaenzt als {sym} (Yahoo: {yname})")
         return
-    df = bulk([sym])
-    if df is None or sym not in df.columns or df[sym].notna().sum() < 60:
-        print(f"   {ev['name']}: nicht ergaenzt ({sym} liefert bei Yahoo keine Kurse)")
-        return
-    try:
-        inf = yf.Ticker(sym).info or {}
-        yname = inf.get("longName") or inf.get("shortName") or ""
-    except Exception as e:
-        yname = ""
-        print(f"   {ev['name']}: Firmenname bei Yahoo nicht abrufbar ({type(e).__name__})")
-    if not yname or not (norm_tokens(ev["name"]) & norm_tokens(yname)):
-        print(f"   {ev['name']}: nicht ergaenzt (Yahoo-Name {yname!r} passt nicht sicher zu {sym})")
-        return
-    info[sym] = {"n": ev["name"], "sec": "Sonstige", "ix": ["STOXX 600"]}
-    frames.append(df[[sym]])
-    print(f"STOXX-Abgleich: {ev['name']} aus STOXX-Mitteilung ergaenzt als {sym} (Yahoo: {yname})")
+    print(f"   {ev['name']}: nicht ergaenzt ({why})")
 
 def download(chunk):
     for _ in range(3):
