@@ -24,8 +24,8 @@ URLS_STOXX = [
     "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/1478358465952.ajax?fileType=csv&fileName=EXSA_holdings&dataType=fund",
     "https://www.ishares.com/de/privatanleger/de/produkte/251931/ishares-stoxx-europe-600-ucits-etf-de-fund/latest-holdings.csv",
 ]
-# Eingebaute Reserveliste (Stand 2025) - nur falls Wikipedia nicht lesbar ist und keine listen/dow.csv existiert
-DOW = "AAPL AMGN AMZN AXP BA CAT CRM CSCO CVX DIS GS HD HON IBM JNJ JPM KO MCD MMM MRK MSFT NKE NVDA PG SHW TRV UNH V VZ WMT".split()
+# Eingebaute Reserveliste Dow Jones (Stand 14.11.2026; Alphabet ersetzt Verizon seit 29.06.2026) - nur als letzte Notloesung
+DOW = "AAPL AMGN AMZN AXP BA CAT CRM CSCO CVX DIS GOOGL GS HD HON IBM JNJ JPM KO MCD MMM MRK MSFT NKE NVDA PG SHW TRV UNH V WMT".split()
 KRYPTO = "BTC ETH BNB SOL XRP ADA DOGE AVAX TRX LINK DOT LTC BCH XLM ATOM ETC".split()
 ORDER = ["S&P 500", "NASDAQ 100", "Dow Jones", "DAX", "STOXX 600", "Russell 2000", "SSE Comp.", "Krypto"]
 FILES = {"S&P 500": "listen/sp500.csv", "NASDAQ 100": "listen/nasdaq100.csv", "Dow Jones": "listen/dow.csv", "DAX": "listen/dax.csv",
@@ -194,11 +194,47 @@ def src_ndx():
         print("NASDAQ 100 Wikipedia:", e, "-> versuche Nasdaq-API")
     return nasdaq_api()
 
+URLS_DOW = ["https://stockanalysis.com/etf/dia/holdings/", "https://www.slickcharts.com/symbol/DIA/holdings"]
+
+def dow_from_etf():
+    """Bestandsliste des Dow-ETFs DIA (State Street) - enthaelt genau die 30 Index-Werte (+ Kasse)."""
+    last = "keine Adresse"
+    for u in URLS_DOW:
+        try:
+            r = requests.get(u, headers=BROWSER, timeout=30)
+            r.raise_for_status()
+            for t in pd.read_html(io.StringIO(r.text)):
+                cols = [str(c) for c in t.columns]
+                t.columns = cols
+                sc, nc = pick(cols, "symbol"), pick(cols, "name", "holding")
+                if not sc:
+                    continue
+                items = []
+                for _, row in t.iterrows():
+                    sym = str(row[sc]).strip().upper()
+                    if re.fullmatch(r"[A-Z]{1,5}", sym) and sym != "USD":
+                        items.append((sym, str(row[nc]).strip() if nc else sym, "Sonstige"))
+                if 29 <= len(items) <= 31:
+                    return items
+            last = u + " -> keine Tabelle mit 30 Werten"
+        except Exception as e:
+            last = f"{u} -> {type(e).__name__}: {str(e)[:60]}"
+    raise ValueError(last)
+
 def src_dow():
+    try:
+        items = dow_from_etf()
+        diff = set(t for t, _, _ in items) ^ set(DOW)
+        if diff:
+            print("   HINWEIS Dow: Reserveliste im Skript weicht von der aktuellen ETF-Liste ab:", sorted(diff))
+        print("   Dow Jones aus der DIA-Bestandsliste")
+        return items
+    except Exception as e:
+        print("Dow ETF-Liste:", e, "-> versuche Wikipedia")
     try:
         return wiki(URL_DOW, 28)
     except Exception as e:
-        print("Dow Wikipedia:", e, "-> eingebaute Liste (Stand 2025)")
+        print("Dow Wikipedia:", e, "-> eingebaute Reserveliste (Stand 14.11.2026)")
     return [(t, t, "Sonstige") for t in DOW]
 
 def src_dax():
