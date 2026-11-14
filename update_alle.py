@@ -1,4 +1,4 @@
-import io, json, os, time, datetime
+import io, json, os, re, time, datetime
 import numpy as np
 import pandas as pd, requests, yfinance as yf
 
@@ -38,6 +38,9 @@ COUNTRY = {"GB": [".L", ".AS"], "JE": [".L"], "GG": [".L"], "IM": [".L"], "BM": 
            "AT": [".VI"], "LU": [".PA", ".AS", ".DE", ".L"], "PL": [".WA"], "GR": [".AT"]}
 FALL = [".L", ".DE", ".PA", ".AS", ".SW", ".MI", ".MC", ".ST"]
 MAXPASS = 5
+# Von STOXX offiziell gestrichen, aber in der iShares-Liste noch enthalten (Quelle: STOXX-Mitteilung vom 02.03.2026, gueltig ab 23.03.2026;
+# in den Mitteilungen vom 01.06. und 01.09.2026 nicht wieder aufgenommen). Weitere Eintraege: Datei listen/ausschluss.csv (Spalten Index;Ticker).
+EXCLUDE = {("STOXX 600", "TECN")}
 
 def pick(cols, *keys):
     for k in keys:
@@ -88,6 +91,7 @@ def ishares_csv(urls, minrows):
                     break
             if head is None:
                 raise ValueError("Kopfzeile nicht gefunden (kein CSV?)")
+            print("   Vorspann der Datei:", " | ".join(l.strip() for l in lines[:head] if l.strip())[:220])
             df = pd.read_csv(io.StringIO("\n".join(lines[head:])), dtype=str, on_bad_lines="skip").fillna("")
             if len(df) < minrows:
                 raise ValueError(f"nur {len(df)} Zeilen")
@@ -247,6 +251,101 @@ def collect():
     add("Krypto", [(c + "-USD", c, "Krypto") for c in KRYPTO], "raw")
     return info, pending
 
+def exclusions():
+    ex = set(EXCLUDE)
+    path = "listen/ausschluss.csv"
+    if os.path.exists(path):
+        try:
+            for ix, tk in custom(path):
+                ex.add((ix.strip(), tk.strip().upper()))
+        except Exception as e:
+            print("FEHLER ausschluss.csv:", e)
+    return ex
+
+STOP = {"AG", "SA", "SE", "NV", "PLC", "SPA", "ASA", "AB", "OYJ", "GROUP", "GRP", "HLDG", "HLDGS", "HOLDING", "HOLDINGS", "THE",
+        "CO", "CORP", "CORPORATION", "LTD", "SAB", "AS", "INC", "KGAA", "PREF", "REG", "ORD", "CLASS", "SDR", "ADR"}
+
+def norm_tokens(name):
+    t = re.sub(r"[^A-Z0-9 ]", " ", name.upper().replace("&", " AND "))
+    return {w for w in t.split() if w not in STOP and len(w) > 1}
+
+def parse_release(html):
+    """Liest eine STOXX-Mitteilung (Additions/Deletions). Rueckgabe: (Stichtag, [Ereignisse])"""
+    text = re.sub(r"<[^>]+>", " ", html)
+    m = re.search(r"[Ee]ffective as of the opening of European markets on ([A-Z][a-z]+ \d{1,2}, \d{4})", text)
+    if not m:
+        return None, []
+    eff = datetime.datetime.strptime(m.group(1), "%B %d, %Y").date()
+    events = []
+    for t in pd.read_html(io.StringIO(html)):
+        cols = {str(c).strip().lower(): c for c in t.columns}
+        if "additions" in cols and "deletions" in cols:
+            for kind, col in (("add", cols["additions"]), ("del", cols["deletions"])):
+                for cell in t[col].dropna().astype(str):
+                    g = re.match(r"^(.*?)\s*\((\w\w),\s*(.*),\s*([^,]+)\)\s*$", cell.strip())
+                    if g:
+                        events.append({"kind": kind, "date": eff, "name": g.group(1).strip(),
+                                       "root": re.sub(r"[^a-z0-9]", "", g.group(4).split(".")[0].lower())})
+            break
+    return eff, events
+
+def stoxx_events():
+    """Holt die offiziellen STOXX-Mitteilungen der letzten Quartale (stoxx.com) und gibt alle Aufnahmen/Streichungen zurueck."""
+    today = datetime.date.today()
+    events, seen = [], set()
+    for year in (today.year - 1, today.year):
+        for ab in ("mar", "jun", "sep", "dec"):
+            for d in range(1, 6):
+                for dd in dict.fromkeys((f"{d:02d}", str(d))):
+                    url = f"https://stoxx.com/stoxx-europe-600-index-composition-changes-{ab}-{dd}-{year}/"
+                    try:
+                        r = requests.get(url, headers=UA, timeout=30)
+                        if r.status_code != 200 or "Additions" not in r.text:
+                            continue
+                        eff, ev = parse_release(r.text)
+                    except Exception:
+                        continue
+                    if eff and eff not in seen and eff <= today:
+                        seen.add(eff)
+                        events += ev
+                        print(f"   STOXX-Mitteilung {ab} {year}: gueltig ab {eff}, {len(ev)} Meldungen")
+    return events
+
+def ev_match(ev, h):
+    te, th = norm_tokens(ev["name"]), norm_tokens(h["n"])
+    if not te or not te <= th:
+        return False
+    return len(te) > 1 or len(next(iter(te))) >= 4 or te == th or re.sub(r"[^a-z0-9]", "", h["tk"].lower()) == ev["root"]
+
+def reconcile_stoxx(pending, events=None):
+    """Gleicht die iShares-Liste mit den offiziellen STOXX-Mitteilungen ab: gestrichene Aktien fliegen raus, fehlende Aufnahmen werden gemeldet."""
+    try:
+        events = stoxx_events() if events is None else events
+    except Exception as e:
+        print("Abgleich mit STOXX nicht moeglich:", e)
+        return pending
+    if not events:
+        print("Abgleich mit STOXX: keine Mitteilungen abrufbar - es gilt nur die iShares-Liste")
+        return pending
+    events = sorted(events, key=lambda e: e["date"])
+    keep = []
+    for h in pending:
+        last = None
+        for ev in events:
+            if ev_match(ev, h):
+                last = ev
+        if last and last["kind"] == "del":
+            print(f"STOXX-Abgleich: {h['n']} ({h['tk']}) laut STOXX zum {last['date']} gestrichen -> entfernt")
+            continue
+        keep.append(h)
+    latest = {}
+    for ev in events:
+        latest[frozenset(norm_tokens(ev["name"]))] = ev
+    for ev in latest.values():
+        if ev["kind"] == "add" and not any(ev_match(ev, h) for h in keep):
+            print(f"STOXX-Abgleich: WARNUNG - {ev['name']} (Aufnahme zum {ev['date']}) fehlt in der iShares-Liste")
+    return keep
+
 def download(chunk):
     for _ in range(3):
         try:
@@ -282,6 +381,8 @@ def main():
     info, pending = collect()
     tickers = list(info)
     print(len(tickers), "Ticker (ohne STOXX-Zuordnung)")
+    if pending:
+        pending = reconcile_stoxx(pending)
     frames = [bulk(tickers)] if tickers else []
     # STOXX 600: Boersen-Endung durch Ausprobieren finden
     for rank in range(max([len(h["cands"]) for h in pending] or [0])):
@@ -305,6 +406,13 @@ def main():
                     h["ok"] = True
         frames.append(df[keep])
         print(f"STOXX 600 Durchgang {rank + 1}: {len(keep)} Ticker zugeordnet")
+    for ix, tk in exclusions():
+        for sym in list(info):
+            if (sym == tk or sym.split(".")[0] == tk) and ix in info[sym]["ix"]:
+                info[sym]["ix"].remove(ix)
+                print(f"Ausgeschlossen: {sym} aus {ix}")
+                if not info[sym]["ix"]:
+                    del info[sym]
     miss = [h["n"] for h in pending if not h["ok"]]
     if pending:
         from collections import Counter
