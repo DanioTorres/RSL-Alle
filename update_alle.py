@@ -329,41 +329,48 @@ BROWSER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
            "Accept": "text/html,application/xhtml+xml", "Accept-Language": "en-US,en;q=0.9"}
 
 def stoxx_events():
-    """Holt die offiziellen STOXX-Mitteilungen der letzten Quartale (stoxx.com bzw. iss-stoxx.com) und gibt alle Aufnahmen/Streichungen zurueck."""
+    """Holt die offiziellen STOXX-Mitteilungen der letzten Quartale (stoxx.com, danach iss-stoxx.com) und gibt alle Aufnahmen/Streichungen zurueck."""
     today = datetime.date.today()
     events, seen, stats, err = [], set(), {}, None
-    urls = []
+    u1 = []
     for year in (today.year - 1, today.year):
         for ab in ("mar", "jun", "sep", "dec"):
             for d in range(1, 6):
                 for dd in dict.fromkeys((f"{d:02d}", str(d))):
-                    urls.append(f"https://stoxx.com/stoxx-europe-600-index-composition-changes-{ab}-{dd}-{year}/")
-    urls += [f"https://www.iss-stoxx.com/press-releases/stoxx-europe-600-index-composition-changes{x}/" for x in ("", "-2", "-3", "-4", "-5", "-6", "-7", "-8")]
+                    u1.append(f"https://stoxx.com/stoxx-europe-600-index-composition-changes-{ab}-{dd}-{year}/")
+    u2 = [f"https://www.iss-stoxx.com/press-releases/stoxx-europe-600-index-composition-changes{x}/" for x in ("", "-2", "-3", "-4", "-5", "-6", "-7", "-8")]
     def count(k):
         stats[k] = stats.get(k, 0) + 1
-    for url in urls:
-        try:
-            r = requests.get(url, headers=BROWSER, timeout=30)
-            count(r.status_code)
-            if stats.get(403, 0) >= 6 and not seen:
-                break  # vermutlich gesperrt, nicht weiter probieren
-            if r.status_code != 200:
+    for name, group in (("stoxx.com", u1), ("iss-stoxx.com", u2)):
+        blocked = 0
+        for url in group:
+            try:
+                r = requests.get(url, headers=BROWSER, timeout=30)
+                count(f"{name}:{r.status_code}")
+                if r.status_code == 403:
+                    blocked += 1
+                    if blocked >= 4:
+                        break  # diese Seite sperrt uns, naechste Quelle probieren
+                    continue
+                if r.status_code != 200:
+                    continue
+                if "Additions" not in r.text:
+                    count(f"{name}:200 ohne Tabelle")
+                    continue
+                eff, ev = parse_release(r.text)
+            except Exception as e:
+                count(f"{name}:Fehler")
+                err = err or f"{type(e).__name__}: {str(e)[:90]}"
                 continue
-            if "Additions" not in r.text:
-                count("200 ohne Tabelle")
+            if not eff:
+                count(f"{name}:ohne Datum")
                 continue
-            eff, ev = parse_release(r.text)
-        except Exception as e:
-            count("Fehler")
-            err = err or f"{type(e).__name__}: {str(e)[:90]}"
-            continue
-        if not eff:
-            count("ohne Datum")
-            continue
-        if eff not in seen and eff <= today:
-            seen.add(eff)
-            events += ev
-            print(f"   STOXX-Mitteilung: gueltig ab {eff}, {len(ev)} Meldungen ({url[:60]}...)")
+            if eff not in seen and eff <= today:
+                seen.add(eff)
+                events += ev
+                print(f"   STOXX-Mitteilung: gueltig ab {eff}, {len(ev)} Meldungen ({name})")
+        if seen:
+            break
     print("   STOXX-Seiten abgefragt:", stats, ("| erster Fehler: " + err) if err else "")
     return events
 
