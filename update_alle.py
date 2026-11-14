@@ -289,26 +289,46 @@ def parse_release(html):
             break
     return eff, events
 
+BROWSER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+           "Accept": "text/html,application/xhtml+xml", "Accept-Language": "en-US,en;q=0.9"}
+
 def stoxx_events():
-    """Holt die offiziellen STOXX-Mitteilungen der letzten Quartale (stoxx.com) und gibt alle Aufnahmen/Streichungen zurueck."""
+    """Holt die offiziellen STOXX-Mitteilungen der letzten Quartale (stoxx.com bzw. iss-stoxx.com) und gibt alle Aufnahmen/Streichungen zurueck."""
     today = datetime.date.today()
-    events, seen = [], set()
+    events, seen, stats, err = [], set(), {}, None
+    urls = []
     for year in (today.year - 1, today.year):
         for ab in ("mar", "jun", "sep", "dec"):
             for d in range(1, 6):
                 for dd in dict.fromkeys((f"{d:02d}", str(d))):
-                    url = f"https://stoxx.com/stoxx-europe-600-index-composition-changes-{ab}-{dd}-{year}/"
-                    try:
-                        r = requests.get(url, headers=UA, timeout=30)
-                        if r.status_code != 200 or "Additions" not in r.text:
-                            continue
-                        eff, ev = parse_release(r.text)
-                    except Exception:
-                        continue
-                    if eff and eff not in seen and eff <= today:
-                        seen.add(eff)
-                        events += ev
-                        print(f"   STOXX-Mitteilung {ab} {year}: gueltig ab {eff}, {len(ev)} Meldungen")
+                    urls.append(f"https://stoxx.com/stoxx-europe-600-index-composition-changes-{ab}-{dd}-{year}/")
+    urls += [f"https://www.iss-stoxx.com/press-releases/stoxx-europe-600-index-composition-changes{x}/" for x in ("", "-2", "-3", "-4", "-5", "-6", "-7", "-8")]
+    def count(k):
+        stats[k] = stats.get(k, 0) + 1
+    for url in urls:
+        try:
+            r = requests.get(url, headers=BROWSER, timeout=30)
+            count(r.status_code)
+            if stats.get(403, 0) >= 6 and not seen:
+                break  # vermutlich gesperrt, nicht weiter probieren
+            if r.status_code != 200:
+                continue
+            if "Additions" not in r.text:
+                count("200 ohne Tabelle")
+                continue
+            eff, ev = parse_release(r.text)
+        except Exception as e:
+            count("Fehler")
+            err = err or f"{type(e).__name__}: {str(e)[:90]}"
+            continue
+        if not eff:
+            count("ohne Datum")
+            continue
+        if eff not in seen and eff <= today:
+            seen.add(eff)
+            events += ev
+            print(f"   STOXX-Mitteilung: gueltig ab {eff}, {len(ev)} Meldungen ({url[:60]}...)")
+    print("   STOXX-Seiten abgefragt:", stats, ("| erster Fehler: " + err) if err else "")
     return events
 
 def ev_match(ev, h):
