@@ -331,7 +331,7 @@ def parse_release(html):
                 g = re.match(r"^(.*?)\s*\(([A-Za-z]{2}),\s*(.*),\s*([^,()]+)\)\s*$", cell)
                 if g:
                     events.append({"kind": kind, "date": eff, "name": g.group(1).strip(),
-                                   "root": re.sub(r"[^a-z0-9]", "", g.group(4).split(".")[0].lower())})
+                                   "root": re.sub(r"[^a-z0-9]", "", g.group(4).split(".")[0].lower()), "code": g.group(4).strip()})
         if events:
             break
     if not events:
@@ -390,22 +390,44 @@ def stoxx_events():
     print("   STOXX-Seiten abgefragt:", stats, ("| erster Fehler: " + err) if err else "")
     return events
 
+def tok_in(t, th):
+    """Wort kommt in der Wortmenge vor (auch als Wortanfang, z.B. TECH ~ TECHNOLOGIE)."""
+    return any(t == u or (len(t) >= 4 and u.startswith(t)) or (len(u) >= 4 and t.startswith(u)) for u in th)
+
 def ev_match(ev, h):
     te, th = norm_tokens(ev["name"]), norm_tokens(h["n"])
-    if not te or not te <= th:
+    if not te:
         return False
-    return len(te) > 1 or len(next(iter(te))) >= 4 or te == th or re.sub(r"[^a-z0-9]", "", h["tk"].lower()) == ev["root"]
+    same_code = re.sub(r"[^a-z0-9]", "", h["tk"].lower()) == ev["root"]
+    if same_code and (te & th):
+        return True  # gleicher Boersencode und mindestens ein gemeinsames Namenswort
+    hit = [t for t in te if tok_in(t, th)]
+    if len(hit) < len(te):
+        # Toleranz: bei mind. 3 Woertern darf ein Wort fehlen (z.B. Zusatz "BSK"), wenn ein langes, unterscheidendes Wort passt
+        if not (len(te) >= 3 and len(te) - len(hit) <= 1 and any(len(t) >= 6 for t in hit)):
+            return False
+        return True
+    return len(te) > 1 or len(next(iter(te))) >= 4 or te == th or same_code
+
+def similar(name, holdings, n=2):
+    te = norm_tokens(name)
+    sc = []
+    for h in holdings:
+        th = norm_tokens(h["n"])
+        if te and th and te & th:
+            sc.append((len(te & th) / len(te | th), h["n"]))
+    return [x[1] for x in sorted(sc, reverse=True)[:n]]
 
 def reconcile_stoxx(pending, events=None):
-    """Gleicht die iShares-Liste mit den offiziellen STOXX-Mitteilungen ab: gestrichene Aktien fliegen raus, fehlende Aufnahmen werden gemeldet."""
+    """Gleicht die iShares-Liste mit den offiziellen STOXX-Mitteilungen ab. Rueckgabe: (bereinigte Liste, fehlende Aufnahmen)."""
     try:
         events = stoxx_events() if events is None else events
     except Exception as e:
         print("Abgleich mit STOXX nicht moeglich:", e)
-        return pending
+        return pending, []
     if not events:
         print("Abgleich mit STOXX: keine Mitteilungen abrufbar - es gilt nur die iShares-Liste")
-        return pending
+        return pending, []
     events = sorted(events, key=lambda e: e["date"])
     keep = []
     for h in pending:
@@ -420,10 +442,50 @@ def reconcile_stoxx(pending, events=None):
     latest = {}
     for ev in events:
         latest[frozenset(norm_tokens(ev["name"]))] = ev
+    missing = []
     for ev in latest.values():
         if ev["kind"] == "add" and not any(ev_match(ev, h) for h in keep):
-            print(f"STOXX-Abgleich: WARNUNG - {ev['name']} (Aufnahme zum {ev['date']}) fehlt in der iShares-Liste")
-    return keep
+            sim = similar(ev["name"], pending)
+            print(f"STOXX-Abgleich: {ev['name']} (Aufnahme zum {ev['date']}) fehlt in der iShares-Liste" + (f" (aehnlich: {'; '.join(sim)})" if sim else ""))
+            missing.append(ev)
+    return keep, missing
+
+RIC = {"L": ".L", "DE": ".DE", "PA": ".PA", "AS": ".AS", "S": ".SW", "MC": ".MC", "MI": ".MI", "ST": ".ST", "CO": ".CO",
+       "OL": ".OL", "HE": ".HE", "BR": ".BR", "LS": ".LS", "VI": ".VI", "WA": ".WA", "AT": ".AT", "I": ".IR", "IR": ".IR"}
+
+def ric_to_yahoo(code):
+    base, _, ex = code.partition(".")
+    suf = RIC.get(re.sub(r"\d+$", "", ex).upper())
+    root = re.sub(r"[a-z]+$", "", base).upper()
+    return root + suf if suf and root else None
+
+def add_missing(ev, info, frames):
+    """Fehlende STOXX-Aufnahme ergaenzen: Yahoo-Symbol aus dem STOXX-Code ableiten, Kurse und Firmennamen pruefen."""
+    sym = ric_to_yahoo(ev.get("code", ""))
+    if not sym:
+        print(f"   {ev['name']}: nicht ergaenzt (STOXX-Code {ev.get('code')!r} nicht umsetzbar)")
+        return
+    if sym in info:
+        if "STOXX 600" not in info[sym]["ix"]:
+            info[sym]["ix"].append("STOXX 600")
+        print(f"   {ev['name']}: {sym} war schon vorhanden, jetzt auch dem STOXX 600 zugeordnet")
+        return
+    df = bulk([sym])
+    if df is None or sym not in df.columns or df[sym].notna().sum() < 60:
+        print(f"   {ev['name']}: nicht ergaenzt ({sym} liefert bei Yahoo keine Kurse)")
+        return
+    try:
+        inf = yf.Ticker(sym).info or {}
+        yname = inf.get("longName") or inf.get("shortName") or ""
+    except Exception as e:
+        yname = ""
+        print(f"   {ev['name']}: Firmenname bei Yahoo nicht abrufbar ({type(e).__name__})")
+    if not yname or not (norm_tokens(ev["name"]) & norm_tokens(yname)):
+        print(f"   {ev['name']}: nicht ergaenzt (Yahoo-Name {yname!r} passt nicht sicher zu {sym})")
+        return
+    info[sym] = {"n": ev["name"], "sec": "Sonstige", "ix": ["STOXX 600"]}
+    frames.append(df[[sym]])
+    print(f"STOXX-Abgleich: {ev['name']} aus STOXX-Mitteilung ergaenzt als {sym} (Yahoo: {yname})")
 
 def download(chunk):
     for _ in range(3):
@@ -460,8 +522,9 @@ def main():
     info, pending = collect()
     tickers = list(info)
     print(len(tickers), "Ticker (ohne STOXX-Zuordnung)")
+    missing = []
     if pending:
-        pending = reconcile_stoxx(pending)
+        pending, missing = reconcile_stoxx(pending)
     frames = [bulk(tickers)] if tickers else []
     # STOXX 600: Boersen-Endung durch Ausprobieren finden
     for rank in range(max([len(h["cands"]) for h in pending] or [0])):
@@ -485,6 +548,8 @@ def main():
                     h["ok"] = True
         frames.append(df[keep])
         print(f"STOXX 600 Durchgang {rank + 1}: {len(keep)} Ticker zugeordnet")
+    for ev in missing:
+        add_missing(ev, info, frames)
     for ix, tk in exclusions():
         for sym in list(info):
             if (sym == tk or sym.split(".")[0] == tk) and ix in info[sym]["ix"]:
