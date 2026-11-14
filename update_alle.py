@@ -306,24 +306,37 @@ def norm_tokens(name):
     return {w for w in t.split() if w not in STOP and len(w) > 1}
 
 def parse_release(html):
-    """Liest eine STOXX-Mitteilung (Additions/Deletions). Rueckgabe: (Stichtag, [Ereignisse])"""
+    """Liest eine STOXX-Mitteilung (Additions/Deletions). Rueckgabe: (Stichtag, [Ereignisse], Diagnose-Text)"""
     text = re.sub(r"<[^>]+>", " ", html)
     m = re.search(r"[Ee]ffective as of the opening of European markets on ([A-Z][a-z]+ \d{1,2}, \d{4})", text)
     if not m:
-        return None, []
+        return None, [], ""
     eff = datetime.datetime.strptime(m.group(1), "%B %d, %Y").date()
-    events = []
-    for t in pd.read_html(io.StringIO(html)):
-        cols = {str(c).strip().lower(): c for c in t.columns}
-        if "additions" in cols and "deletions" in cols:
-            for kind, col in (("add", cols["additions"]), ("del", cols["deletions"])):
-                for cell in t[col].dropna().astype(str):
-                    g = re.match(r"^(.*?)\s*\((\w\w),\s*(.*),\s*([^,]+)\)\s*$", cell.strip())
-                    if g:
-                        events.append({"kind": kind, "date": eff, "name": g.group(1).strip(),
-                                       "root": re.sub(r"[^a-z0-9]", "", g.group(4).split(".")[0].lower())})
+    events, dbg = [], ""
+    tables = pd.read_html(io.StringIO(html))
+    for t in tables:
+        grid = [[str(c) for c in t.columns]] + t.astype(str).values.tolist()  # Kopfzeile kann Spaltenname oder erste Zeile sein
+        hdr = None
+        for i in range(min(5, len(grid))):
+            row = [re.sub(r"\s+", " ", c).strip().lower() for c in grid[i]]
+            if "additions" in row and "deletions" in row:
+                hdr = (i, row.index("additions"), row.index("deletions"))
+                break
+        if hdr is None:
+            continue
+        i0, ca, cd = hdr
+        for r in grid[i0 + 1:]:
+            for kind, c in (("add", ca), ("del", cd)):
+                cell = re.sub(r"\s+", " ", str(r[c])).strip()
+                g = re.match(r"^(.*?)\s*\(([A-Za-z]{2}),\s*(.*),\s*([^,()]+)\)\s*$", cell)
+                if g:
+                    events.append({"kind": kind, "date": eff, "name": g.group(1).strip(),
+                                   "root": re.sub(r"[^a-z0-9]", "", g.group(4).split(".")[0].lower())})
+        if events:
             break
-    return eff, events
+    if not events:
+        dbg = f"{len(tables)} Tabellen gefunden, Format nicht erkannt. Beispiel: " + (str(grid[:3])[:300] if tables else "")
+    return eff, events, dbg
 
 BROWSER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
            "Accept": "text/html,application/xhtml+xml", "Accept-Language": "en-US,en;q=0.9"}
@@ -331,7 +344,7 @@ BROWSER = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 def stoxx_events():
     """Holt die offiziellen STOXX-Mitteilungen der letzten Quartale (stoxx.com, danach iss-stoxx.com) und gibt alle Aufnahmen/Streichungen zurueck."""
     today = datetime.date.today()
-    events, seen, stats, err = [], set(), {}, None
+    events, seen, stats, err, dbg_shown = [], set(), {}, None, []
     u1 = []
     for year in (today.year - 1, today.year):
         for ab in ("mar", "jun", "sep", "dec"):
@@ -357,7 +370,7 @@ def stoxx_events():
                 if "Additions" not in r.text:
                     count(f"{name}:200 ohne Tabelle")
                     continue
-                eff, ev = parse_release(r.text)
+                eff, ev, dbg = parse_release(r.text)
             except Exception as e:
                 count(f"{name}:Fehler")
                 err = err or f"{type(e).__name__}: {str(e)[:90]}"
@@ -369,6 +382,9 @@ def stoxx_events():
                 seen.add(eff)
                 events += ev
                 print(f"   STOXX-Mitteilung: gueltig ab {eff}, {len(ev)} Meldungen ({name})")
+                if dbg and not any("Format nicht erkannt" in x for x in dbg_shown):
+                    dbg_shown.append(dbg)
+                    print("   Diagnose:", dbg)
         if seen:
             break
     print("   STOXX-Seiten abgefragt:", stats, ("| erster Fehler: " + err) if err else "")
