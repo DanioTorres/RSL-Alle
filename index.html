@@ -43,7 +43,7 @@ table{border-collapse:collapse;width:100%;min-width:1100px}
 th{position:sticky;top:0;background:var(--pa);text-align:left;font-weight:600;color:var(--mu);font-size:12px;padding:12px 14px;border-bottom:1px solid var(--bd);white-space:nowrap}
 td{padding:9px 12px;border-bottom:1px solid var(--bd);white-space:nowrap}
 tbody tr:hover td{background:var(--bar)}
-td:nth-child(1){color:var(--mu);width:56px}td:nth-child(3){font-weight:700}.nm{max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mu)}.mu{color:var(--mu)}td:nth-child(2){white-space:nowrap;font-size:12px;font-weight:600}tr.h1 td{background:rgba(0,168,132,.07)}tr.h2 td{background:rgba(0,168,132,.17)}tr.h2 td:first-child{box-shadow:inset 3px 0 0 var(--up)}.ue{color:var(--dn);font-weight:700;cursor:help;margin-left:4px;font-size:12px}td a{color:inherit;text-decoration:none}td a:hover{text-decoration:underline;color:var(--ac)}.chk{display:flex;align-items:center;gap:6px;color:var(--mu);font-size:13px;padding:0 6px}.chk input{padding:0}.plan{background:var(--pa);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:14px 18px;margin-bottom:16px}
+.nm{max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--mu)}.mu{color:var(--mu)}tr.h1 td{background:rgba(0,168,132,.07)}tr.h2 td{background:rgba(0,168,132,.17)}tr.h2 td:first-child{box-shadow:inset 3px 0 0 var(--up)}.ue{color:var(--dn);font-weight:700;cursor:help;margin-left:4px;font-size:12px}td a{color:inherit;text-decoration:none}td a:hover{text-decoration:underline;color:var(--ac)}.chk{display:flex;align-items:center;gap:6px;color:var(--mu);font-size:13px;padding:0 6px}.chk input{padding:0}.plan{background:var(--pa);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:14px 18px;margin-bottom:16px}
 .ph{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.ph label{display:flex;gap:6px;align-items:center;color:var(--mu);font-size:13px}.ph select{padding:4px 10px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--bd);border-radius:12px;padding:8px 12px;min-width:132px}
 .chip em{font-style:normal;color:var(--ac);font-weight:800;margin-right:6px}.chip small{display:block;color:var(--mu);font-size:11px;margin-top:2px}.chip>span{font-size:12px;display:block}
@@ -59,67 +59,226 @@ a.nav{padding:7px 15px;border:1px solid var(--bd);border-radius:999px;background
 dialog{background:var(--pa);color:var(--tx);border:1px solid var(--bd);border-radius:var(--r);max-width:560px;width:92%}
 textarea{width:100%;height:180px;font:12px monospace;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px}
 .row{display:flex;gap:8px;margin-top:10px;justify-content:flex-end;flex-wrap:wrap}
+.hb{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar{display:flex;gap:12px 20px;align-items:center;flex-wrap:wrap;background:var(--pa);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 18px;margin-bottom:12px}
+.tl{font-size:12px;font-weight:700;color:var(--mu);margin-right:8px}
+.seg{display:inline-flex;background:var(--bar);border-radius:999px;padding:3px}.seg button{border:0;background:transparent;color:var(--mu);font-weight:700;padding:5px 15px}.seg button.on{background:var(--ac);color:#fff}
+.sw{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600}.sw input{display:none}.sw i{width:36px;height:20px;border-radius:999px;background:var(--bar);position:relative;transition:.15s;flex:none}.sw i:after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.15s}.sw input:checked+i{background:var(--ac)}.sw input:checked+i:after{left:18px}
+.toolbar.noext .ext-only{display:none}
+#tip{position:fixed;display:none;z-index:50;max-width:350px;background:var(--pa);color:var(--tx);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:10px 13px;font-size:12px;line-height:1.5;pointer-events:none}
+#tip .tt{display:block;font-size:13px;margin-bottom:4px}#tip p{margin:6px 0 0}#tip .ts{color:var(--mu)}#tip .mt{border-collapse:collapse;width:100%;min-width:0;margin-top:6px}#tip .mt td{padding:1px 6px 1px 0;border:0}
+.mb{display:inline-block;height:7px;border-radius:2px;vertical-align:middle}.mb.p{background:var(--up)}.mb.n{background:var(--dn)}
+[data-t]{cursor:help}
+.pill{display:inline-block;margin-left:7px;padding:1px 9px;border-radius:999px;background:#f5d34a;color:#4a3b00;font-size:11px;font-weight:700;vertical-align:1px}
+tr.out td{background:rgba(245,211,74,.22)}tr.lo td{background:rgba(224,72,43,.06)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--mu);margin:0 0 8px}.legend i{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:6px;vertical-align:-2px;border:1px solid var(--bd)}
+.tt2{margin:6px 0 2px;font-size:20px;letter-spacing:-.02em}.tt2 small{font-size:12px;font-weight:400;color:var(--mu);margin-left:8px;letter-spacing:0}
+.tqc{display:inline-block;min-width:50px;text-align:center;padding:2px 8px;border-radius:8px;font-weight:700}.tqc.p{background:rgba(0,168,132,.18);color:var(--up)}.tqc.n{background:rgba(224,72,43,.16);color:var(--dn)}.tqc.z{background:var(--bar);color:var(--mu)}
+.ri{display:inline-block;min-width:44px;text-align:center;padding:2px 6px;border-radius:6px}.ri.hi{background:rgba(224,72,43,.2);color:var(--dn);font-weight:700}.ri.lw{background:rgba(0,168,132,.2);color:var(--up);font-weight:700}
+.sb{display:inline-block;padding:2px 9px;border-radius:6px;font-weight:700;font-size:12px}.sb.u{background:rgba(0,168,132,.16);color:var(--up)}.sb.d{background:rgba(224,72,43,.16);color:var(--dn)}
+.ma{font-size:18px;font-weight:800;line-height:1}.ma.u2,.ma.u1{color:var(--up)}.ma.fl{color:var(--mu)}.ma.d1,.ma.d2{color:var(--dn)}
+.wl{cursor:pointer;font-size:17px;color:var(--mu);user-select:none}.wl.w{color:#f59e0b}.wl.t{color:#3b82f6}.wl.b{background:linear-gradient(90deg,#f59e0b 50%,#3b82f6 50%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mover{background:var(--ink);color:var(--bg);border-radius:var(--r);margin-bottom:12px;overflow:hidden}.mover summary{padding:14px 20px;font-weight:700;font-size:15px;cursor:pointer;color:var(--bg)}
+.mvb{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;padding:4px 20px 16px;background:var(--pa);color:var(--tx)}.mvb h4{margin:12px 0 6px;font-size:13px}.mv{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.disc{color:var(--mu);font-size:11px;margin:14px 0 0}
+th[data-t],td [data-t]{cursor:help}
+td small{font-weight:700;font-size:11px}
+@media print{.toolbar,.ctl,.plan,.mover,.tabs,.hb,#tip,details,.warn{display:none!important}body{background:#fff!important}.tw{max-height:none!important;overflow:visible!important;box-shadow:none}table{min-width:0}}
+td:first-child{color:var(--mu)}td.sy{font-weight:700}td.sy a{font-weight:700}table{min-width:1400px}
+.hb{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar{display:flex;gap:12px 20px;align-items:center;flex-wrap:wrap;background:var(--pa);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 18px;margin-bottom:12px}
+.tl{font-size:12px;font-weight:700;color:var(--mu);margin-right:8px}
+.seg{display:inline-flex;background:var(--bar);border-radius:999px;padding:3px}.seg button{border:0;background:transparent;color:var(--mu);font-weight:700;padding:5px 15px}.seg button.on{background:var(--ac);color:#fff}
+.sw{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600}.sw input{display:none}.sw i{width:36px;height:20px;border-radius:999px;background:var(--bar);position:relative;transition:.15s;flex:none}.sw i:after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.15s}.sw input:checked+i{background:var(--ac)}.sw input:checked+i:after{left:18px}
+.toolbar.noext .ext-only{display:none}
+#tip{position:fixed;display:none;z-index:50;max-width:350px;background:var(--pa);color:var(--tx);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:10px 13px;font-size:12px;line-height:1.5;pointer-events:none}
+#tip .tt{display:block;font-size:13px;margin-bottom:4px}#tip p{margin:6px 0 0}#tip .ts{color:var(--mu)}#tip .mt{border-collapse:collapse;width:100%;min-width:0;margin-top:6px}#tip .mt td{padding:1px 6px 1px 0;border:0}
+.mb{display:inline-block;height:7px;border-radius:2px;vertical-align:middle}.mb.p{background:var(--up)}.mb.n{background:var(--dn)}
+[data-t]{cursor:help}
+.pill{display:inline-block;margin-left:7px;padding:1px 9px;border-radius:999px;background:#f5d34a;color:#4a3b00;font-size:11px;font-weight:700;vertical-align:1px}
+tr.out td{background:rgba(245,211,74,.22)}tr.lo td{background:rgba(224,72,43,.06)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--mu);margin:0 0 8px}.legend i{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:6px;vertical-align:-2px;border:1px solid var(--bd)}
+.tt2{margin:6px 0 2px;font-size:20px;letter-spacing:-.02em}.tt2 small{font-size:12px;font-weight:400;color:var(--mu);margin-left:8px;letter-spacing:0}
+.tqc{display:inline-block;min-width:50px;text-align:center;padding:2px 8px;border-radius:8px;font-weight:700}.tqc.p{background:rgba(0,168,132,.18);color:var(--up)}.tqc.n{background:rgba(224,72,43,.16);color:var(--dn)}.tqc.z{background:var(--bar);color:var(--mu)}
+.ri{display:inline-block;min-width:44px;text-align:center;padding:2px 6px;border-radius:6px}.ri.hi{background:rgba(224,72,43,.2);color:var(--dn);font-weight:700}.ri.lw{background:rgba(0,168,132,.2);color:var(--up);font-weight:700}
+.sb{display:inline-block;padding:2px 9px;border-radius:6px;font-weight:700;font-size:12px}.sb.u{background:rgba(0,168,132,.16);color:var(--up)}.sb.d{background:rgba(224,72,43,.16);color:var(--dn)}
+.ma{font-size:18px;font-weight:800;line-height:1}.ma.u2,.ma.u1{color:var(--up)}.ma.fl{color:var(--mu)}.ma.d1,.ma.d2{color:var(--dn)}
+.wl{cursor:pointer;font-size:17px;color:var(--mu);user-select:none}.wl.w{color:#f59e0b}.wl.t{color:#3b82f6}.wl.b{background:linear-gradient(90deg,#f59e0b 50%,#3b82f6 50%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.mover{background:var(--ink);color:var(--bg);border-radius:var(--r);margin-bottom:12px;overflow:hidden}.mover summary{padding:14px 20px;font-weight:700;font-size:15px;cursor:pointer;color:var(--bg)}
+.mvb{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;padding:4px 20px 16px;background:var(--pa);color:var(--tx)}.mvb h4{margin:12px 0 6px;font-size:13px}.mv{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--bd);font-size:13px}
+.disc{color:var(--mu);font-size:11px;margin:14px 0 0}
+th[data-t],td [data-t]{cursor:help}
+td small{font-weight:700;font-size:11px}
+@media print{.toolbar,.ctl,.plan,.mover,.tabs,.hb,#tip,details,.warn{display:none!important}body{background:#fff!important}.tw{max-height:none!important;overflow:visible!important;box-shadow:none}table{min-width:0}}
+td:first-child{color:var(--mu)}td.sy{font-weight:700}td.sy a{font-weight:700}table{min-width:1200px}.w{max-width:1760px}td{padding:8px 8px}th{padding:11px 8px}.g{width:96px}.nm{max-width:170px}
 </style>
 </head>
 <body>
 <div class="w">
 <header>
  <div><h1>RSL<span>.</span>Dashboard Alle</h1><div class="sub" id="stand"></div></div>
- <div style="display:flex;gap:8px"><a class="nav" href="https://daniotorres.github.io/RSL/">← RSL Dashboard (S&amp;P 500)</a><select id="dsel" style="display:none" title="Stichtag wählen"></select><button id="imp">⬆ Daten importieren</button><button id="th">Dunkel</button></div>
+ <div class="hb"><a class="nav" href="https://daniotorres.github.io/RSL/">← RSL Dashboard (S&amp;P 500)</a><select id="dsel" style="display:none" title="Stichtag wählen"></select><button id="imp">⬆ Daten importieren</button><button id="th">Dunkel</button></div>
 </header>
 <div class="tabs" id="tabs"></div>
 <div class="kpis" id="kpis"></div>
 <div class="top" id="top"></div>
 <div id="warn" class="warn"></div>
-<div class="plan"><div class="ph"><b>Portfolio-Vorschlag ★</b><label>Anzahl Aktien <select id="pn"><option>5</option><option>7</option><option>10</option><option>15</option></select></label><label>Mein Depot <input id="pdep" placeholder="Ticker, z.B. MRNA, ACN, XOM" style="width:250px"></label><label><input type="checkbox" id="pue" checked> ⚠ Übernahme-Verdacht ausschließen</label><span id="prule" class="sub"></span></div><div class="chips" id="pl"></div><div class="pn" id="pnote"></div></div>
+<div class="plan"><div class="ph"><b>Portfolio-Vorschlag ★</b><label>Anzahl Aktien <select id="pn"><option>5</option><option>7</option><option>10</option><option>15</option></select></label><label>Mein Depot <input id="pdep" placeholder="Ticker, z.B. MRNA, ACN, XOM" style="width:250px"></label><label><input type="checkbox" id="pue" checked> ⚠ Ausreißer ausschließen</label><span id="prule" class="sub"></span></div><div class="chips" id="pl"></div><div class="pn" id="pnote"></div></div>
+<div class="toolbar" id="tbar">
+ <div><span class="tl">Zeitraum (RSL)</span><span class="seg" id="seg"><button data-b="T">26T</button><button data-b="W" class="on">26W</button></span></div>
+ <label class="sw" data-t="sw:ext"><input type="checkbox" id="sext" checked><i></i>Erweiterte Strategie</label>
+ <label class="sw ext-only" data-t="sw:ind"><input type="checkbox" id="sind" checked><i></i>Indikatoren</label>
+ <label class="sw ext-only" data-t="sw:tq"><input type="checkbox" id="stq" checked><i></i>Trendqualität</label>
+ <label class="sw" data-t="sw:out"><input type="checkbox" id="sout" checked><i></i>Ausreißer ausblenden</label>
+ <button id="pdf">Als PDF exportieren</button><button id="tex">Ticker exportieren</button>
+</div>
+<details class="mover" id="mover"><summary id="mvs">RSL Top Mover (5 Tage)</summary><div id="mvb" class="mvb"></div></details>
 <details><summary>Sektorverteilung anzeigen (Anteil mit RSL &gt; 1)</summary><div class="sec" id="sec"></div></details>
 <div class="ctl">
  <input id="q" placeholder="Ticker exakt suchen, z.B. MU, NVDA">
  <select id="sf"></select>
- <label class="chk"><input type="checkbox" id="hue"> ⚠ Verdachtsfälle ausblenden</label><select id="so"><option value="rank">Sortierung: Rank</option><option value="r26">Sortierung: RSL 26 Tage</option><option value="tk">Sortierung: Ticker</option><option value="sec">Sortierung: Sektor</option><option value="low">Sortierung: schwächster RSL</option></select>
+ <label class="chk"><input type="checkbox" id="wlo"> ★ nur Watchlist</label>
+ <select id="so"><option value="rank">Sortierung: Rank</option><option value="tk">Sortierung: Ticker</option><option value="sec">Sortierung: Sektor</option><option value="low">Sortierung: schwächster RSL</option></select>
 </div>
-<div class="tw"><table><thead><tr><th>Rank</th><th title="Rangveränderung zur Vorwoche">Δ Woche</th><th>Ticker</th><th>Name</th><th>Sektor</th><th style="text-align:right">Close</th><th style="text-align:right">SMA26</th><th>RSL (26 Wochen)</th><th>RSL 26 Tage</th><th style="text-align:right">1T</th><th style="text-align:right">1W</th><th style="text-align:right">1M</th></tr></thead><tbody id="tb"></tbody></table></div>
-<div class="foot"><span>RSL = Kurs / SMA26 (Wochenbasis). ⚠ = möglicher Übernahmefall (Kurssprung, danach auffällig ruhig) – Chart prüfen; die Erkennung ist eine Faustregel. Markierung: dunkelgrün = Top 5 in beiden Basen (26 Wochen und 26 Tage), hellgrün = Top 5 in einer Basis. Δ Woche = Rang gegenüber der Vorwoche. ★ = Portfolio-Vorschlag, ● = Position in deinem Depot.</span><span id="cnt"></span></div>
+<h2 class="tt2" id="tt"></h2>
+<div class="legend"><span>Farben:</span><span><i style="background:rgba(0,168,132,.35)"></i>TOP 5 in beiden Basis-Varianten (26 Tage &amp; 26 Wochen)</span><span><i style="background:rgba(0,168,132,.14)"></i>TOP 5 in einer Basis-Variante</span><span><i style="background:rgba(224,72,43,.14)"></i>Untere 75 % (Plätze 6–20)</span><span><i style="background:rgba(245,211,74,.5)"></i>Ausreißer</span></div>
+<div class="tw"><table><thead id="hd"></thead><tbody id="tb"></tbody></table></div>
+<div class="foot"><span>RSL = Kurs / SMA26. ★ = Portfolio-Vorschlag, ● = Position in deinem Depot, Δ = Platzveränderung zur Vorwoche. Fahre mit der Maus über Spaltenköpfe, Werte und Schalter für Erklärungen.</span><span id="cnt"></span></div>
+<p class="disc">Hinweis: Rein informative Kennzahlen, keine Anlageberatung und keine Kauf- oder Verkaufsempfehlung. Es kann vorkommen, dass nicht alle Aktien eines Index vollständig vorhanden sind. Für Vollständigkeit und Richtigkeit der Daten wird keine Garantie übernommen.</p>
 </div>
 
 <dialog id="dlg">
  <b>Daten importieren</b>
- <p class="sub">CSV mit Spalten: <code>Ticker;Sektor;Close;SMA26;Markt</code> (Markt optional, z.B. „S&amp;P 500“ oder „STOXX Europe 600“). Trennzeichen ; , oder Tab, Dezimalkomma ist ok. Der RSL wird automatisch berechnet.</p>
+ <p class="sub">CSV mit Spalten: <code>Ticker;Sektor;Close;SMA26;Markt</code> (Markt optional). Trennzeichen ; , oder Tab, Dezimalkomma ist ok. Der RSL wird automatisch berechnet.</p>
  <textarea id="ta" placeholder="MRNA;Healthcare;218,01;97,00;S&P 500"></textarea>
  <div class="row"><input type="file" id="fi" accept=".csv,.txt"><button id="rs">Demo-Daten</button><button id="cl">Abbrechen</button><button id="ok" style="background:var(--ac);color:#fff;border-color:var(--ac)">Übernehmen</button></div>
 </dialog>
-
 <script>
+var DATADIR="data_alle/";
 var DEMO="MRNA;Healthcare;218.01;97.00\nMPC;Energy;478.07;319.62\nVEEV;Healthcare;310.36;214.40\nVLO;Energy;444.71;312.27\nPSX;Energy;293.17;212.03\nPTC;Technology;192.98;140.24\nILMN;Healthcare;262.54;193.99\nP;Technology;124.01;91.81\nACN;Technology;229.68;171.00\nRVTY;Healthcare;152.64;116.61\nCRL;Healthcare;300.15;234.09\nAPA;Energy;49.15;39.09\nIT;Technology;205.35;164.69\nTMO;Healthcare;690.00;553.95\nMTD;Healthcare;1622.29;1314.82\nA;Healthcare;172.97;140.31\nXOM;Energy;118.40;112.10\nAAPL;Technology;231.50;224.80\nKO;Consumer Staples;68.20;69.90\nNKE;Consumer Discretionary;72.10;81.40\nPFE;Healthcare;24.80;26.10\nINTC;Technology;21.30;23.40";
-var D=[],mk="S&P 500",TH=null;
-var cols=["#9b59b6","#d35400","#16a085","#2980b9","#c0392b","#7f8c8d","#b8860b","#8e44ad"];
-var cc={};function col(s){if(!cc[s])cc[s]=cols[Object.keys(cc).length%cols.length];return cc[s]}
-function num(v,d){v=String(v).trim();if(d!==","){v=v.replace(/\./g,"x").replace(",",".").replace(/x/g,".")==v?v:v}
- if(v.indexOf(",")>-1&&v.indexOf(".")>-1)v=v.replace(/\./g,"").replace(",",".");else v=v.replace(",",".");return parseFloat(v)}
+var D=[],mk="S&P 500",BASE="W",EXT=true,IND=true,TQ=true,HOUT=true,UPD=null,CUR=null,IDX=[],PREVD=[],WL={},RM={},LA=[];
+try{WL=JSON.parse(localStorage.getItem("rsl_wl")||"{}")}catch(e){}
+var cols=["#9b59b6","#d35400","#16a085","#2980b9","#c0392b","#7f8c8d","#b8860b","#8e44ad"],cc={};
+function col(s){if(!cc[s])cc[s]=cols[Object.keys(cc).length%cols.length];return cc[s]}
+function num(v){v=String(v).trim();if(v.indexOf(",")>-1&&v.indexOf(".")>-1)v=v.replace(/\./g,"").replace(",",".");else v=v.replace(",",".");return parseFloat(v)}
 function parse(t){var L=t.split(/\r?\n/).filter(function(x){return x.trim()});if(!L.length)return[];
  var d=L[0].indexOf(";")>-1?";":L[0].indexOf("\t")>-1?"\t":",";var out=[];
- L.forEach(function(l){var c=l.split(d);if(c.length<4)return;var cl=num(c[2],d),sm=num(c[3],d);if(!(cl>0&&sm>0))return;
+ L.forEach(function(l){var c=l.split(d);if(c.length<4)return;var cl=num(c[2]),sm=num(c[3]);if(!(cl>0&&sm>0))return;
   out.push({tk:c[0].trim().toUpperCase(),sec:c[1].trim()||"–",cl:cl,sma:sm,rsl:cl/sm,mk:(c[4]||"S&P 500").trim()})});return out}
-function load(t){D=parse(t);D.sort(function(a,b){return b.rsl-a.rsl});
+function load(t){D=parse(t);PREVD=[];D.sort(function(a,b){return b.rsl-a.rsl});
  var m={};D.forEach(function(x){(x.ix||[x.mk]).forEach(function(k){m[k]=1})});if(mk!=="Alle"&&!m[mk])mk="Alle";render()}
 function f2(n){return n.toLocaleString("de-DE",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function f4(n){return n.toFixed(4)}
+function n2(v,d){return v.toFixed(d).replace(".",",")}
+function pc2(v,d){return(v>0?"+":"")+n2(v,d==null?2:d)+" %"}
 function inM(x,m){return m==="Alle"||(x.ix||[x.mk]).indexOf(m)>-1}
 function cur(){return D.filter(function(x){return inM(x,mk)})}
+var FL={L:"🇬🇧",DE:"🇩🇪",PA:"🇫🇷",AS:"🇳🇱",SW:"🇨🇭",MC:"🇪🇸",MI:"🇮🇹",ST:"🇸🇪",CO:"🇩🇰",OL:"🇳🇴",HE:"🇫🇮",BR:"🇧🇪",LS:"🇵🇹",VI:"🇦🇹",IR:"🇮🇪",WA:"🇵🇱",AT:"🇬🇷",SS:"🇨🇳",SZ:"🇨🇳"};
+var CN={L:"London",DE:"Deutschland (Xetra)",PA:"Paris",AS:"Amsterdam",SW:"Schweiz (SIX)",MC:"Madrid",MI:"Mailand",ST:"Stockholm",CO:"Kopenhagen",OL:"Oslo",HE:"Helsinki",BR:"Brüssel",LS:"Lissabon",VI:"Wien",IR:"Dublin",WA:"Warschau",AT:"Athen",SS:"Shanghai",SZ:"Shenzhen"};
+var TV={L:"LSE",DE:"XETR",PA:"EURONEXT",AS:"EURONEXT",SW:"SIX",MC:"BME",MI:"MIL",ST:"OMXSTO",CO:"OMXCOP",OL:"OSL",HE:"OMXHEX",BR:"EURONEXT",LS:"EURONEXT",VI:"VIE",IR:"EURONEXT",WA:"GPW",AT:"ATHEX",SS:"SSE",SZ:"SZSE"};
+function sfx(x){var m=String(x.tk).match(/^(.*)\.([A-Z]{1,3})$/);return m?{b:m[1],e:m[2]}:null}
+function dsp(x){if(x.sec==="Krypto")return x.tk.replace(/-USD$/,"");var m=sfx(x);return m?m.b:x.tk}
+function flag(x){if(x.sec==="Krypto")return"🪙";var m=sfx(x);return m?(FL[m.e]||"🏳️"):"🇺🇸"}
+function cname(x){if(x.sec==="Krypto")return"Krypto";var m=sfx(x);return"Börsenplatz: "+(m?(CN[m.e]||m.e):"USA")}
+function tvs(x){if(x.sec==="Krypto")return dsp(x)+"USD";var m=sfx(x);if(m&&TV[m.e])return TV[m.e]+":"+m.b.replace(/-/g,"_");return x.tk.replace("-",".")}
+function tvl(x){return"https://www.tradingview.com/chart/?symbol="+tvs(x)}
+function hm(r,t){return r.tk===t||dsp(r)===t||r.tk===t.replace(".","-")}
+function dmy(s){return s.slice(8,10)+"."+s.slice(5,7)+"."}
+function outText(x){if(x.ue){var u=x.ue;return"Festpreis: Kurssprung +"+n2(u[0],1)+" % am "+dmy(u[1])+", seitdem ungewöhnlich ruhig (Ø "+n2(u[2],2)+" % Tagesschwankung), z. B. durch ein Übernahmeangebot. Bitte den Chart prüfen."}
+ if(x.ks){var k=x.ks;return"Kurssprung: +"+n2(k[0],1)+" % an einem Tag ("+dmy(k[1])+"). Der Platz stammt fast nur aus diesem Sprung, z. B. nicht bereinigter Split. Bitte den Chart prüfen."}return""}
+function ue(x){return(x.ue||x.ks)?' <span class="ue" title="'+outText(x)+'">⚠</span>':""}
+/* Mindset-Indikator */
+function mindInfo(x){
+ if(!x.y||x.pe==null)return null;
+ var d1=CUR?new Date(CUR+"T12:00:00"):new Date(),Y=d1.getFullYear();
+ var yrs=x.y.map(function(v,i){return{l:String(2021+i),v:v}});
+ yrs.push({l:Y+" (bis heute)",v:(x.cl/x.pe-1)*100});
+ var tot=1,got=0;yrs.forEach(function(e){if(e.v!=null){tot*=1+e.v/100;got++}});
+ if(!got)return null;
+ var first=yrs.find(function(e){return e.v!=null}),fy=+first.l.slice(0,4),base=fy-1;
+ var yy=Math.max(0.1,(d1-new Date(base+"-12-31T12:00:00"))/864e5/365.25),pa=Math.pow(tot,1/yy)-1;
+ var f=Math.max(0.25,(d1-new Date(Y-1,11,31,12))/864e5/365),num=0,den=0;
+ yrs.forEach(function(e,i){if(e.v==null)return;var w=Math.pow(i+1,0.65),lg=Math.log(Math.max(0.001,1+e.v/100));if(i===yrs.length-1)lg/=f;num+=w*lg;den+=w});
+ var tr=den?(Math.exp(num/den)-1)*100:0,c,lab,ar;
+ if(tr>=20){c="u2";lab="stark steigend";ar="↑"}else if(tr>=5){c="u1";lab="steigend";ar="↗"}else if(tr>-3){c="fl";lab="seitwärts";ar="→"}else if(tr>-15){c="d1";lab="fallend";ar="↘"}else{c="d2";lab="stark fallend";ar="↓"}
+ return{yrs:yrs,tot:(tot-1)*100,pa:pa*100,tr:tr,c:c,lab:lab,ar:ar,since:String(base)}}
+function mindTip(x){var m=mindInfo(x);if(!m)return'<b class="tt">Mindset-Indikator</b>Für diesen Wert liegen keine Jahresdaten vor.';
+ var mx=0;m.yrs.forEach(function(e){if(e.v!=null)mx=Math.max(mx,Math.abs(e.v))});
+ var rows=m.yrs.map(function(e){if(e.v==null)return'<tr><td>'+e.l+'</td><td></td><td class="ts">–</td></tr>';var w=Math.max(2,Math.round(Math.abs(e.v)/(mx||1)*70));
+  return'<tr><td>'+e.l+'</td><td><span class="mb '+(e.v>=0?"p":"n")+'" style="width:'+w+'px"></span></td><td class="'+(e.v>=0?"pos":"neg")+'"><b>'+pc2(e.v,Math.abs(e.v)>=100?0:1)+'</b></td></tr>'}).join("");
+ return'<b class="tt">Mindset-Indikator – '+dsp(x)+'</b><div class="ts">'+(x.nm||"")+'</div><p>Zeigt, wie sich der Wert über mehrere Jahre entwickelt hat – auch durch schwächere Jahre hindurch. Hilft, kurzfristige Schwankungen gelassener einzuordnen.</p><table class="mt">'+rows+'</table><p><b>Gesamt seit Ende '+m.since+': '+pc2(m.tot,0)+'</b> <span class="ts">≈ '+pc2(m.pa,1)+' pro Jahr</span></p><p><span class="ma '+m.c+'">'+m.ar+'</span> <b>Trend: '+m.lab+'</b> <span class="ts">('+pc2(m.tr,1)+' pro Jahr, neuere Jahre zählen stärker)</span></p><p class="ts">Der Mindset-Indikator dient nur der groben Orientierung und stellt keine Anlageberatung dar. Die vergangene Wertentwicklung ist kein verlässlicher Indikator für die Zukunft.</p>'}
+/* Trendqualität */
+function tqInfo(x){var T=BASE==="T",v=T?x.tqd:x.tq,g=T?x.gd:x.gw;if(v==null)return null;
+ var lab=v>=0.35?"stetiger Aufwärtstrend":v>=0.15?"überwiegend aufwärts":v>-0.15?"kein klarer Trend":v>-0.35?"überwiegend abwärts":"stetiger Abwärtstrend";
+ return{v:v,g:g,lab:lab,cls:v>=0.15?"p":v<=-0.15?"n":"z",T:T}}
+function tqTip(x){var t=tqInfo(x);if(!t)return"";return'<b class="tt">Trendqualität '+n2(t.v,2)+' — '+t.lab+'</b>'+(t.g!=null?'Größte Einzel'+(t.T?"tag":"woche")+': '+n2(t.g,1)+'%<br>':'')+'Messzeitraum: letzte 26 '+(t.T?"Tage":"Wochen")}
+/* Tooltips */
+var STAT={
+"h:wl":'<b class="tt">Watchlist:</b>Klicke auf ☆ um Aktien zu speichern',
+"c:wl":'<b class="tt">Watchlist-Sterne</b><div><span class="wl w">★</span> Auf der 26 Week Watchlist</div><div><span class="wl t">★</span> Auf der 26 Day Watchlist</div><div><span class="wl b">★</span> Auf beiden Watchlists</div><div><span class="wl">☆</span> Auf keiner Watchlist</div><p class="ts">Klicken, um den Wert hinzuzufügen oder zu entfernen.</p>',
+"h:dl":'<b class="tt">Δ andere Basis</b>Platz in der jeweils anderen RSL-Rangliste (26 Tage bzw. 26 Wochen), nur angezeigt wenn der Wert dort in den Top 10 steht, und Platzveränderung zur Vorwoche.',
+"h:mind":'<b class="tt">Mindset-Indikator:</b>Kursentwicklung der letzten Jahre',
+"h:rsi":'<b class="tt">Relative Strength Index (14 Tage)</b>&lt; 30 = Überverkauft<br>&gt; 70 = Überkauft',
+"h:macd":'<b class="tt">Moving Average Convergence Divergence</b>',
+"h:sig":'<b class="tt">⚠ KEINE TRADEEMPFEHLUNG!</b>Dies dient NUR zur Orientierung und stellt KEINE Kauf- oder Verkaufsempfehlung dar!',
+"c:sig":'<b class="tt">⚠ KEINE TRADEEMPFEHLUNG!</b>Dies dient NUR zur Orientierung und stellt KEINE Kauf- oder Verkaufsempfehlung dar! Bitte immer eigene Analyse durchführen. Investitionen erfolgen auf eigenes Risiko!',
+"sw:ext":'Blendet die zusätzlichen Schalter (Indikatoren, Trendqualität, Marktstempel) und die Spalten Δ 26T/26W, Mindset und % 1T/1W/1M ein. Ohne sie siehst du die reine RSL-Strategie.',
+"sw:ind":'<b class="tt">RSI &amp; MACD</b>Blendet die Spalten RSI und MACD in der Rangliste ein – zwei verbreitete technische Kennzahlen, mit denen du den jüngsten Kursverlauf einordnen kannst. Beschreibung des bisherigen Verlaufs, kein Signal.',
+"sw:tq":'<b class="tt">Trendqualität</b>Zeigt, wie gleichmäßig sich ein Kurs im gewählten Zeitraum (26 Tage oder 26 Wochen) bewegt hat – und in welche Richtung. Hoher positiver Wert: stetiger Anstieg mit wenig Rückschlägen; negativer Wert: stetiger Abwärtstrend; um 0: kein klarer Trend. Ergänzt den RSL: Der RSL misst die Stärke, die Trendqualität, wie gleichmäßig der Weg dorthin war.',
+"sw:out":'<b class="tt">Ausreißer ausblenden</b>Ausreißer sind gelb markiert („Kurssprung“: Platz stammt fast nur aus einem einzelnen Sprung, z. B. nicht bereinigter Split; „Festpreis“: Kurs nach einem Sprung eng gebunden, z. B. Übernahmeangebot). Dieser Schalter nimmt nur diese Zeilen aus der Ansicht – die Ränge aller anderen Werte bleiben wie in der vollständigen Liste (Lücken in der Nummerierung). Standardmäßig eingeschaltet; ausschalten zeigt alle Werte.'};
+function tipHTML(t,k){
+ if(t==="h:tq"){var T=BASE==="T",z=T?"26 Tage":"26 Wochen";return'<b class="tt">Trendqualität ('+z+')</b>Wie ZIELGERICHTET verlief der Kurs — und in WELCHE RICHTUNG?<br>+0.45 und mehr = stetiger AUFWÄRTSTrend<br>um 0 = kein klarer Trend, viel Hin und Her<br>−0.45 und weniger = stetiger ABWÄRTSTrend<p>Ergänzt den RSL: Der RSL zeigt die Stärke, die Trendqualität die Verlaufsgüte.</p><p>⏲ MESSZEITRAUM: nur die letzten '+z+' — dieselbe Zeitebene wie der RSL-Umschalter. Ältere Kurseinbrüche sind darin NICHT mehr enthalten — für die lange Sicht den Chart öffnen (Klick aufs Kürzel).</p><p class="ts">Rein methodische Kennzahl — keine Anlageempfehlung.</p>'}
+ var x=k?RM[k]:null;
+ if(t==="c:mind")return x?mindTip(x):"";
+ if(t==="c:tq")return x?tqTip(x):"";
+ if(t==="c:macd")return x&&x.macd!=null?'<b class="tt">MACD: '+x.macd.toFixed(3)+'</b>Signal: '+x.sig.toFixed(3):"";
+ if(t==="c:pill")return x?outText(x):"";
+ return STAT[t]||""}
+var tipEl=document.createElement("div");tipEl.id="tip";document.body.appendChild(tipEl);
+function place(e){var w=tipEl.offsetWidth,h=tipEl.offsetHeight,x=e.clientX+14,y=e.clientY+16;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-16;tipEl.style.left=Math.max(8,x)+"px";tipEl.style.top=Math.max(8,y)+"px"}
+document.addEventListener("mouseover",function(e){var t=e.target.closest&&e.target.closest("[data-t]");if(!t){tipEl.style.display="none";return}
+ var h=tipHTML(t.getAttribute("data-t"),t.getAttribute("data-k"));if(!h){tipEl.style.display="none";return}tipEl.innerHTML=h;tipEl.style.display="block";place(e)});
+document.addEventListener("mousemove",function(e){if(tipEl.style.display==="block")place(e)});
+/* Portfolio-Vorschlag */
+function held(){return document.getElementById("pdep").value.split(/[\s,;]+/).map(function(t){return t.trim().toUpperCase()}).filter(function(t,i,a){return t&&a.indexOf(t)===i})}
+function plan(R){var n=+document.getElementById("pn").value,ex=document.getElementById("pue").checked,H=held();
+ var minS=n<=5?3:Math.ceil(n/2),cap=n<=5?n:2,sel=[],add=[],cnt={},dist=0,sk=[],unk=[];
+ R.forEach(function(x){x.sel=false;x.hold=H.some(function(t){return hm(x,t)})});
+ H.forEach(function(t){var x=R.find(function(r){return hm(r,t)})||D.find(function(r){return hm(r,t)});
+  sel.push({tk:x?x.tk:t,sec:x?x.sec:null,rank:x&&x.rank?x.rank:null,rsl:x?x.rsl:null,ue:x?x.ue:null,ks:x?x.ks:null,held:true});
+  if(!x){unk.push(t);return}var c=cnt[x.sec]||0;if(!c)dist++;cnt[x.sec]=c+1});
+ var warn=[];if(n>5)Object.keys(cnt).forEach(function(k){if(cnt[k]>cap)warn.push("Dein Depot hat "+cnt[k]+"× "+k+" (Regel: max. "+cap+")")});
+ if(n<=5&&dist+Math.max(0,n-sel.length)<minS)warn.push("Mit deinem Depot sind "+minS+" Sektoren nicht mehr erreichbar");
+ R.forEach(function(x){if(sel.length>=n||x.hold)return;var why=null;
+  if(x.rsl<=1)why="RSL ≤ 1";else if(ex&&x.out)why="⚠ Ausreißer";
+  else{var c=cnt[x.sec]||0,nd=dist+(c?0:1);if(c>=cap)why=x.sec+" bereits "+cap+"×";else if(nd+(n-sel.length-1)<minS)why="Sektor-Mindestzahl";
+   if(!why){sel.push(x);add.push(x);x.sel=true;cnt[x.sec]=c+1;dist=nd;return}}
+  sk.push({x:x,why:why})});
+ var last=add.length?add[add.length-1].rank:0;sk=sk.filter(function(k){return k.x.rank<last});
+ document.getElementById("prule").textContent=n<=5?"Regel: mindestens 3 verschiedene Sektoren":"Regel: höchstens 2 Aktien pro Sektor";
+ var i=0;document.getElementById("pl").innerHTML=sel.map(function(x){var sc=x.sec?'<span class="dot" style="background:'+col(x.sec)+'"></span>'+x.sec:"nicht im Datensatz";
+  return'<div class="chip'+(x.held?" held":"")+'"><em>'+(x.held?"●":++i)+'</em><b>'+flag(x)+' '+dsp(x)+ue(x)+'</b><span>'+sc+'</span><small>'+(x.held?"im Depot":"neu")+(x.rank?" · Rang "+x.rank:"")+(x.rsl?" · RSL "+f4(x.rsl):"")+'</small></div>'}).join("");
+ var sm=Object.keys(cnt).map(function(k){return k+" "+cnt[k]+"×"}).join(" · ");
+ document.getElementById("pnote").textContent=warn.join(" · ")+(warn.length?" · ":"")+(sel.length>=n&&!add.length&&H.length>=n?"Dein Depot ist bereits voll ("+H.length+" von "+n+"). ":sel.length<n?"Nur "+sel.length+" von "+n+" Plätzen lassen sich regelkonform füllen. ":"")+"Sektoren: "+(sm||"–")+(unk.length?" · ohne Sektor (nicht im Datensatz): "+unk.join(", "):"")+(sk.length?" · Übersprungen: "+sk.map(function(k){return dsp(k.x)+" ("+k.why+")"}).join(", "):"")}
+/* Rangberechnung und Darstellung */
+function ranks(list,f){var o=list.filter(function(x){return f(x)!=null}).sort(function(a,b){return f(b)-f(a)}),r={};o.forEach(function(x,i){r[x.tk]=i+1});return r}
+function fW(x){return x.rsl}function fT(x){return x.r26}
+function dArr(v){return v===null||v===undefined?"":v==="neu"?' <small class="mu">neu</small>':v>0?' <small class="pos">↑'+v+'</small>':v<0?' <small class="neg">↓'+(-v)+'</small>':""}
 function render(){
- var ms=[],OR=["S&P 500","NASDAQ 100","Dow Jones","DAX","STOXX 600","Russell 2000","SSE Comp.","Krypto"];D.forEach(function(x){(x.ix||[x.mk]).forEach(function(m){if(ms.indexOf(m)<0)ms.push(m)})});ms.sort(function(a,b){return(OR.indexOf(a)<0?99:OR.indexOf(a))-(OR.indexOf(b)<0?99:OR.indexOf(b))});
+ var ms=[],OR=["S&P 500","NASDAQ 100","Dow Jones","DAX","STOXX 600","Russell 2000","SSE Comp.","Krypto"];
+ D.forEach(function(x){(x.ix||[x.mk]).forEach(function(m){if(ms.indexOf(m)<0)ms.push(m)})});
+ ms.sort(function(a,b){return(OR.indexOf(a)<0?99:OR.indexOf(a))-(OR.indexOf(b)<0?99:OR.indexOf(b))});
  var T=document.getElementById("tabs");T.innerHTML="";
- ms.concat(ms.length>1?["Alle"]:[]).forEach(function(m){var n=m==="Alle"?D.length:D.filter(function(x){return inM(x,m)}).length;
+ ms.concat(ms.length>1?["Alle"]:[]).forEach(function(m){var n=D.filter(function(x){return inM(x,m)}).length;
   var b=document.createElement("button");b.textContent=m+" ("+n+")";if(m===mk)b.className="on";b.onclick=function(){mk=m;render()};T.appendChild(b)});
- var C=cur();var pm={};PREVD.filter(function(x){return inM(x,mk)}).forEach(function(x,i){pm[x.tk]=i+1});
- var R=C.map(function(x,i){var o=Object.assign({},x);o.rank=i+1;return o});
- var t5=R.slice(0,5).map(function(x){return x.tk}),t5d=R.filter(function(x){return x.r26}).sort(function(a,b){return b.r26-a.r26}).slice(0,5).map(function(x){return x.tk});
- R.forEach(function(x){var a=t5.indexOf(x.tk)>-1,b=t5d.indexOf(x.tk)>-1;x.hl=a&&b?2:(a||b)?1:0;x.dr=PREVD.length?(pm[x.tk]?pm[x.tk]-x.rank:"neu"):null});
- var sc={};R.slice(0,10).forEach(function(x){sc[x.sec]=(sc[x.sec]||0)+1});var wk=Object.keys(sc).sort(function(a,b){return sc[b]-sc[a]})[0];
- var wl=[];if(wk&&sc[wk]>=4)wl.push("⚠ "+sc[wk]+" der Top 10 sind "+wk+" (Klumpenrisiko)");
- var ut=R.slice(0,10).filter(function(x){return x.ue}).map(function(x){return dsp(x)});if(ut.length)wl.push("⚠ Möglicher Übernahmefall in den Top 10: "+ut.join(", ")+" – vor dem Kauf den Chart prüfen");
- document.getElementById("warn").innerHTML=wl.map(function(t){return"<div>"+t+"</div>"}).join("");
- var up=R.filter(function(x){return x.rsl>1}).length,top=R[0];
+ T.style.display=ms.length>1?"":"none";
+ var all=cur(),rkW=ranks(all,fW),rkT=ranks(all,fT),pv=PREVD.filter(function(x){return inM(x,mk)}),pW=ranks(pv,fW),pT=ranks(pv,fT);
+ var act=BASE==="T"?rkT:rkW,pAct=BASE==="T"?pT:pW,oth=BASE==="T"?rkW:rkT,pOth=BASE==="T"?pW:pT;
+ var R=all.filter(function(x){return act[x.tk]}).map(function(x){var o=Object.assign({},x);o.rW=x.rsl;o.rT=x.r26;o.rsl=BASE==="T"?x.r26:x.rsl;o.rank=act[x.tk];o.rkO=oth[x.tk]||null;
+  o.dr=PREVD.length?(pAct[x.tk]?pAct[x.tk]-o.rank:"neu"):null;o.drO=(o.rkO&&pOth[x.tk])?pOth[x.tk]-o.rkO:null;
+  var a=rkW[x.tk]<=5,b=rkT[x.tk]<=5;o.hl=a&&b?2:(a||b)?1:0;o.out=!!(x.ue||x.ks);return o});
+ R.sort(function(a,b){return a.rank-b.rank});RM={};R.forEach(function(x){RM[x.tk]=x});
+ var shown=HOUT?R.filter(function(x){return!x.out}):R,up=R.filter(function(x){return x.rsl>1}).length,top=shown[0];
  var S={};R.forEach(function(x){var s=S[x.sec]||(S[x.sec]={n:0,u:0,s:0});s.n++;s.s+=x.rsl;if(x.rsl>1)s.u++});
  var best=Object.keys(S).sort(function(a,b){return S[b].s/S[b].n-S[a].s/S[a].n})[0];
  document.getElementById("kpis").innerHTML=
@@ -127,26 +286,78 @@ function render(){
   '<div class="kpi"><small>RSL &gt; 1 (Marktbreite)</small><b class="pos">'+up+'</b> <small style="display:inline">('+(R.length?Math.round(up/R.length*100):0)+' %)</small><div class="br"><i style="width:'+(R.length?up/R.length*100:0)+'%"></i></div></div>'+
   '<div class="kpi"><small>Stärkstes RSL</small><b>'+(top?f2(top.rsl)+' <small style="display:inline">'+dsp(top)+'</small>':"–")+'</b></div>'+
   '<div class="kpi"><small>Stärkster Sektor (Ø RSL)</small><b style="font-size:15px">'+(best?best+" ("+(S[best].s/S[best].n).toFixed(3)+")":"–")+'</b></div>';
- document.getElementById("top").innerHTML=R.slice(0,10).map(function(x){var w=Math.min(100,Math.max(0,(x.rsl-1)/(top.rsl-1||1)*100));
-  return '<div><em>'+x.rank+'</em><b>'+flag(x)+' '+dsp(x)+ue(x)+'</b><small>'+x.sec+'</small><span class="r">'+f4(x.rsl)+'</span><i style="width:'+w+'%"></i></div>'}).join("");
+ document.getElementById("top").innerHTML=shown.slice(0,10).map(function(x){var w=Math.min(100,Math.max(0,(x.rsl-1)/((top?top.rsl:2)-1||1)*100));
+  return'<div><em>'+x.rank+'</em><b>'+flag(x)+' '+dsp(x)+ue(x)+'</b><small>'+x.sec+'</small><span class="r">'+f4(x.rsl)+'</span><i style="width:'+w+'%"></i></div>'}).join("");
+ var sc={};R.slice(0,10).forEach(function(x){sc[x.sec]=(sc[x.sec]||0)+1});var wk=Object.keys(sc).sort(function(a,b){return sc[b]-sc[a]})[0];
+ var wl=[];if(wk&&sc[wk]>=4)wl.push("⚠ "+sc[wk]+" der Top 10 sind "+wk+" (Klumpenrisiko)");
+ var ut=R.slice(0,10).filter(function(x){return x.out}).map(function(x){return dsp(x)});if(ut.length)wl.push("⚠ Möglicher Ausreißer in den Top 10: "+ut.join(", ")+" – vor dem Kauf den Chart prüfen");
+ document.getElementById("warn").innerHTML=wl.map(function(t){return"<div>"+t+"</div>"}).join("");
  document.getElementById("sec").innerHTML=Object.keys(S).sort(function(a,b){return S[b].u/S[b].n-S[a].u/S[a].n}).map(function(s){var p=Math.round(S[s].u/S[s].n*100);
-  return '<div><span><span class="dot" style="background:'+col(s)+'"></span>'+s+'</span><span class="bar" style="width:100%;margin:0"><i style="width:'+p+'%"></i></span><span>'+p+' %</span></div>'}).join("");
- var sf=document.getElementById("sf"),pv=sf.value;sf.innerHTML='<option value="">Alle Sektoren</option>'+Object.keys(S).sort().map(function(s){return '<option>'+s+'</option>'}).join("");sf.value=pv&&S[pv]?pv:"";
- plan(R);window.R=R;table();
+  return'<div><span><span class="dot" style="background:'+col(s)+'"></span>'+s+'</span><span class="bar" style="width:100%;margin:0"><i style="width:'+p+'%"></i></span><span>'+p+' %</span></div>'}).join("");
+ var sf=document.getElementById("sf"),pvv=sf.value;sf.innerHTML='<option value="">Alle Sektoren</option>'+Object.keys(S).sort().map(function(s){return'<option>'+s+'</option>'}).join("");sf.value=pvv&&S[pvv]?pvv:"";
+ plan(R);window.R=R;movers(R);table();
+ var upd=UPD?String(UPD).replace("Handelsschluss ",""):"";
+ document.getElementById("tt").innerHTML=(mk==="Alle"?"Alle Indizes":mk)+", "+(BASE==="T"?"26 Tage":"26 Wochen")+(upd?'<small>Kurse vom '+upd+' (Schlusskurs)</small>':"");
  document.getElementById("stand").textContent=(UPD&&CUR?"Stand: "+fd(nxt(CUR))+", 10:00 Uhr · "+UPD:UPD?"Datenstand: "+UPD:"Demo-/Importdaten")+" · "+D.length+" Aktien"}
+function movers(R){var el=document.getElementById("mvb");document.getElementById("mvs").textContent="RSL Top Mover (5 Tage) – "+(mk==="Alle"?"Alle Indizes":mk);
+ if(!PREVD.length){el.innerHTML='<p class="sub">Für diesen Stichtag gibt es noch keinen Vergleich zur Vorwoche.</p>';return}
+ var ok=function(x){return!(HOUT&&x.out)},num2=function(x){return typeof x.dr==="number"};
+ var up=R.filter(function(x){return ok(x)&&num2(x)&&x.dr>0&&x.rank<=100}).sort(function(a,b){return b.dr-a.dr}).slice(0,5);
+ var dn=R.filter(function(x){return ok(x)&&num2(x)&&x.dr<0&&x.rank-x.dr<=100}).sort(function(a,b){return a.dr-b.dr}).slice(0,5);
+ function li(x){return'<div class="mv"><span>'+flag(x)+' <b>'+dsp(x)+'</b> <span class="mu">'+(x.nm||"")+'</span></span><span>Platz '+(x.rank+x.dr)+' → '+x.rank+' <b class="'+(x.dr>0?"pos":"neg")+'">'+(x.dr>0?"▲ ":"▼ ")+Math.abs(x.dr)+'</b></span></div>'}
+ el.innerHTML='<div><h4>Größte Aufsteiger (Top 100)</h4>'+(up.map(li).join("")||'<p class="sub">–</p>')+'</div><div><h4>Größte Absteiger (aus den Top 100)</h4>'+(dn.map(li).join("")||'<p class="sub">–</p>')+'</div>'}
+function colset(){var c=[{k:"rank",l:"Rang"},{k:"wl",l:"WL",t:"wl"}];
+ if(EXT)c.push({k:"dl",l:"Δ "+(BASE==="T"?"26W":"26T"),t:"dl"});
+ c.push({k:"sym",l:"Symbol"},{k:"nm",l:"Name"},{k:"sec",l:"Sektor"});
+ if(EXT)c.push({k:"mind",l:"Mindset",t:"mind"});
+ c.push({k:"cl",l:"Close",a:1},{k:"sma",l:"SMA26",a:1},{k:"rsl",l:"RSL"});
+ if(EXT&&TQ)c.push({k:"tq",l:"Trendqualität",t:"tq"});
+ if(EXT&&IND)c.push({k:"rsi",l:"RSI",t:"rsi"},{k:"macd",l:"MACD",t:"macd"},{k:"sig",l:"Signal",t:"sig"});
+ if(EXT)c.push({k:"d1",l:"% 1T",a:1},{k:"w1",l:"% 1W",a:1},{k:"m1",l:"% 1M",a:1});
+ return c}
+function pcell(v){return v==null?'<td class="mu" style="text-align:right">–</td>':'<td class="'+(v>=0?"pos":"neg")+'" style="text-align:right">'+pc2(v,2)+'</td>'}
+function cell(k,x,mx){
+ if(k==="rank")return'<td>'+x.rank+dArr(x.dr)+(x.hold?' <span class="pk" title="Im Depot">●</span>':x.sel?' <span class="pk" title="Im Portfolio-Vorschlag">★</span>':'')+'</td>';
+ if(k==="wl"){var s=WL[x.tk]||0,c=s===3?"b":s===2?"t":s===1?"w":"";return'<td><span class="wl '+c+'" data-wl="'+x.tk+'" data-t="c:wl">'+(s?"★":"☆")+'</span></td>'}
+ if(k==="dl")return'<td class="mu">'+(x.rkO&&x.rkO<=10?'<b>'+x.rkO+'</b>'+dArr(x.drO):"–")+'</td>';
+ if(k==="sym")return'<td class="sy"><span class="fl" title="'+cname(x)+'">'+flag(x)+'</span> <a href="'+tvl(x)+'" target="_blank" rel="noopener" title="'+x.tk+' – Chart in TradingView öffnen">'+dsp(x)+'</a></td>';
+ if(k==="nm")return'<td class="nm" title="'+(x.nm||"").replace(/"/g,"")+'">'+(x.nm||"")+'</td>';
+ if(k==="sec")return'<td><span class="dot" style="background:'+col(x.sec)+'"></span>'+x.sec+'</td>';
+ if(k==="mind"){var m=mindInfo(x);return m?'<td><span class="ma '+m.c+'" data-t="c:mind" data-k="'+x.tk+'">'+m.ar+'</span></td>':'<td class="mu">–</td>'}
+ if(k==="cl")return'<td style="text-align:right">'+f2(x.cl)+'</td>';
+ if(k==="sma"){var sv=BASE==="T"?x.s26:x.sma;return'<td style="text-align:right;color:var(--mu)">'+(sv?f2(sv):"–")+'</td>'}
+ if(k==="rsl"){var p=x.rsl>=1,w=Math.min(100,Math.abs(x.rsl-1)/(mx-1||1)*100),kd=x.ue?"Festpreis":x.ks?"Kurssprung":"";
+  return'<td class="'+(p?"pos":"neg")+'"><span class="rs">'+f4(x.rsl)+'</span><span class="g"><i class="'+(p?"":"n")+'" style="width:'+(w/2)+'%"></i></span>'+(kd?'<span class="pill" data-t="c:pill" data-k="'+x.tk+'">'+kd+'</span>':"")+'</td>'}
+ if(k==="tq"){var t=tqInfo(x);return t?'<td><span class="tqc '+t.cls+'" data-t="c:tq" data-k="'+x.tk+'">'+(t.v>0?"+":"")+n2(t.v,2)+'</span></td>':'<td class="mu">–</td>'}
+ if(k==="rsi")return x.rsi==null?'<td class="mu">–</td>':'<td><span class="ri'+(x.rsi>=70?" hi":x.rsi<=30?" lw":"")+'">'+n2(x.rsi,1)+'</span></td>';
+ if(k==="macd")return x.macd==null?'<td class="mu">–</td>':'<td class="'+(x.macd>=0?"pos":"neg")+'" data-t="c:macd" data-k="'+x.tk+'">'+(x.macd>0?"+":"")+n2(x.macd,2)+'</td>';
+ if(k==="sig")return x.macd==null||x.sig==null?'<td class="mu">–</td>':'<td><span class="sb '+(x.macd>x.sig?"u":"d")+'" data-t="c:sig">'+(x.macd>x.sig?"↗ Bullish":"↘ Bearish")+'</span></td>';
+ if(k==="d1")return pcell(x.d1);if(k==="w1")return pcell(x.w1);if(k==="m1")return pcell(x.m1);return"<td></td>"}
 function table(){
- var q=document.getElementById("q").value.trim().toUpperCase(),s=document.getElementById("sf").value,o=document.getElementById("so").value;
- var A=(window.R||[]).filter(function(x){return(!q||x.tk===q||dsp(x)===q)&&(!s||x.sec===s)&&!(document.getElementById("hue").checked&&x.ue)});
- if(o==="r26")A.sort(function(a,b){return(b.r26||0)-(a.r26||0)});if(o==="tk")A.sort(function(a,b){return a.tk<b.tk?-1:1});if(o==="sec")A.sort(function(a,b){return a.sec<b.sec?-1:1});if(o==="low")A.sort(function(a,b){return a.rsl-b.rsl});
- var mx=window.R&&window.R.length?window.R[0].rsl:2;
- function dr(v){return v===null||v===undefined?"":v==="neu"?'<span class="mu">neu</span>':v>0?'<span class="pos">▲ '+v+'</span>':v<0?'<span class="neg">▼ '+(-v)+'</span>':'<span class="mu">–</span>'}
- function pc(v){return v==null?'<td style="text-align:right" class="mu">–</td>':'<td class="'+(v>=0?"pos":"neg")+'" style="text-align:right">'+(v>0?"+":"")+v.toFixed(2).replace(".",",")+' %</td>'}
- document.getElementById("tb").innerHTML=A.map(function(x){var p=x.rsl>=1,w=Math.min(100,Math.abs(x.rsl-1)/(mx-1||1)*100);
-  return '<tr class="h'+x.hl+'"><td>'+x.rank+(x.hold?' <span class="pk" title="Im Depot">●</span>':x.sel?' <span class="pk" title="Im Portfolio-Vorschlag">★</span>':'')+'</td><td>'+dr(x.dr)+'</td><td><span class="fl" title="'+cname(x)+'">'+flag(x)+'</span> <a href="'+tvl(x)+'" target="_blank" rel="noopener" title="'+x.tk+' – Chart in TradingView öffnen">'+dsp(x)+'</a>'+ue(x)+'</td><td class="nm" title="'+(x.nm||"").replace(/"/g,"")+'">'+(x.nm||"")+'</td><td><span class="dot" style="background:'+col(x.sec)+'"></span>'+x.sec+'</td><td style="text-align:right">'+f2(x.cl)+'</td><td style="text-align:right;color:var(--mu)">'+f2(x.sma)+'</td><td class="'+(p?"pos":"neg")+'"><span class="rs">'+f4(x.rsl)+'</span><span class="g"><i class="'+(p?"":"n")+'" style="width:'+(w/2)+'%"></i></span></td><td>'+(x.r26?f4(x.r26):"–")+'</td>'+pc(x.d1)+pc(x.w1)+pc(x.m1)+'</tr>'}).join("");
+ var q=document.getElementById("q").value.trim().toUpperCase(),s=document.getElementById("sf").value,o=document.getElementById("so").value,wlo=document.getElementById("wlo").checked;
+ var A=(window.R||[]).filter(function(x){return(!q||x.tk===q||dsp(x)===q)&&(!s||x.sec===s)&&!(HOUT&&x.out)&&(!wlo||WL[x.tk])});
+ if(o==="tk")A.sort(function(a,b){return a.tk<b.tk?-1:1});if(o==="sec")A.sort(function(a,b){return a.sec<b.sec?-1:1});if(o==="low")A.sort(function(a,b){return a.rsl-b.rsl});
+ var mx=window.R&&window.R.length?window.R[0].rsl:2,C=colset();LA=A;
+ document.getElementById("hd").innerHTML="<tr>"+C.map(function(c){return"<th"+(c.a?' style="text-align:right"':"")+(c.t?' data-t="h:'+c.t+'"':"")+">"+c.l+"</th>"}).join("")+"</tr>";
+ document.getElementById("tb").innerHTML=A.map(function(x){
+  return'<tr class="'+(x.out?"out":"h"+x.hl+(x.rank>5&&x.rank<=20?" lo":""))+'">'+C.map(function(c){return cell(c.k,x,mx)}).join("")+"</tr>"}).join("");
  document.getElementById("cnt").textContent=A.length+" von "+(window.R?window.R.length:0)+" Aktien"}
-["q","sf","so","hue"].forEach(function(i){document.getElementById(i).oninput=table});["pn","pue"].forEach(function(i){document.getElementById(i).onchange=render});
+/* Bedienung */
+["q","sf","so","wlo"].forEach(function(i){document.getElementById(i).oninput=table});
+["pn","pue"].forEach(function(i){document.getElementById(i).onchange=render});
 try{document.getElementById("pdep").value=localStorage.getItem("rsl_depot")||""}catch(e){}
 document.getElementById("pdep").onchange=function(){try{localStorage.setItem("rsl_depot",this.value)}catch(e){}render()};
+document.getElementById("seg").onclick=function(e){var b=e.target.getAttribute&&e.target.getAttribute("data-b");if(!b)return;BASE=b;
+ Array.prototype.forEach.call(this.children,function(c){c.className=c.getAttribute("data-b")===b?"on":""});render()};
+document.getElementById("sext").onchange=function(){EXT=this.checked;document.getElementById("tbar").className="toolbar"+(EXT?"":" noext");table()};
+document.getElementById("sind").onchange=function(){IND=this.checked;table()};
+document.getElementById("stq").onchange=function(){TQ=this.checked;table()};
+document.getElementById("sout").onchange=function(){HOUT=this.checked;render()};
+document.getElementById("tb").onclick=function(e){var k=e.target.getAttribute&&e.target.getAttribute("data-wl");if(!k)return;var bit=BASE==="T"?2:1,v=(WL[k]||0)^bit;if(v)WL[k]=v;else delete WL[k];
+ try{localStorage.setItem("rsl_wl",JSON.stringify(WL))}catch(er){}table()};
+function dl(name,text){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/plain"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+document.getElementById("tex").onclick=function(){dl("rsl_ticker.txt",LA.map(tvs).join(","))};
+document.getElementById("pdf").onclick=function(){window.print()};
 var dlg=document.getElementById("dlg"),ta=document.getElementById("ta");
 document.getElementById("imp").onclick=function(){dlg.showModal()};
 document.getElementById("cl").onclick=function(){dlg.close()};
@@ -155,48 +366,18 @@ document.getElementById("fi").onchange=function(e){var r=new FileReader();r.onlo
 document.getElementById("ok").onclick=function(){if(ta.value.trim()){load(ta.value);try{localStorage.setItem("rsl_data",ta.value)}catch(e){}}dlg.close()};
 document.getElementById("th").onclick=function(){var d=document.documentElement,dark=d.dataset.theme?d.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;
  d.dataset.theme=dark?"light":"dark";this.textContent=dark?"Dunkel":"Hell"};
-var UPD=null,CUR=null,IDX=[],PREVD=[];
-var FL={L:"🇬🇧",DE:"🇩🇪",PA:"🇫🇷",AS:"🇳🇱",SW:"🇨🇭",MC:"🇪🇸",MI:"🇮🇹",ST:"🇸🇪",CO:"🇩🇰",OL:"🇳🇴",HE:"🇫🇮",BR:"🇧🇪",LS:"🇵🇹",VI:"🇦🇹",IR:"🇮🇪",WA:"🇵🇱",AT:"🇬🇷",SS:"🇨🇳",SZ:"🇨🇳"};
-var CN={L:"London",DE:"Deutschland (Xetra)",PA:"Paris",AS:"Amsterdam",SW:"Schweiz (SIX)",MC:"Madrid",MI:"Mailand",ST:"Stockholm",CO:"Kopenhagen",OL:"Oslo",HE:"Helsinki",BR:"Brüssel",LS:"Lissabon",VI:"Wien",IR:"Dublin",WA:"Warschau",AT:"Athen",SS:"Shanghai",SZ:"Shenzhen"};
-var TV={L:"LSE",DE:"XETR",PA:"EURONEXT",AS:"EURONEXT",SW:"SIX",MC:"BME",MI:"MIL",ST:"OMXSTO",CO:"OMXCOP",OL:"OSL",HE:"OMXHEX",BR:"EURONEXT",LS:"EURONEXT",VI:"VIE",IR:"EURONEXT",WA:"GPW",AT:"ATHEX",SS:"SSE",SZ:"SZSE"};
-function sfx(x){var m=String(x.tk).match(/^(.*)\.([A-Z]{1,3})$/);return m?{b:m[1],e:m[2]}:null}
-function dsp(x){if(x.sec==="Krypto")return x.tk.replace(/-USD$/,"");var m=sfx(x);return m?m.b:x.tk}
-function flag(x){if(x.sec==="Krypto")return"🪙";var m=sfx(x);return m?(FL[m.e]||"🏳️"):"🇺🇸"}
-function cname(x){if(x.sec==="Krypto")return"Krypto";var m=sfx(x);return"Börsenplatz: "+(m?(CN[m.e]||m.e):"USA")}
-function tvl(x){var u="https://www.tradingview.com/chart/?symbol=";if(x.sec==="Krypto")return u+dsp(x)+"USD";var m=sfx(x);if(m&&TV[m.e])return u+TV[m.e]+":"+m.b.replace(/-/g,"_");return u+x.tk.replace("-",".")}
-function hm(r,t){return r.tk===t||dsp(r)===t||r.tk===t.replace(".","-")}
-function ueText(x){var u=x.ue;return "Möglicher Übernahmefall: Kurssprung +"+String(u[0]).replace(".",",")+" % am "+u[1].slice(8,10)+"."+u[1].slice(5,7)+"., seitdem ungewöhnlich ruhig (Ø "+String(u[2]).replace(".",",")+" % Tagesschwankung). Bitte den Chart prüfen."}
-function ue(x){return x.ue?' <span class="ue" title="'+ueText(x)+'">⚠</span>':""}
-function held(){return document.getElementById("pdep").value.split(/[\s,;]+/).map(function(t){return t.trim().toUpperCase()}).filter(function(t,i,a){return t&&a.indexOf(t)===i})}
-function plan(R){var n=+document.getElementById("pn").value,ex=document.getElementById("pue").checked,H=held();
- var minS=n<=5?3:Math.ceil(n/2),cap=n<=5?n:2,sel=[],add=[],cnt={},dist=0,sk=[],unk=[];
- R.forEach(function(x){x.sel=false;x.hold=H.some(function(t){return hm(x,t)})});
- H.forEach(function(t){var x=R.find(function(r){return hm(r,t)})||D.find(function(r){return hm(r,t)});
-  sel.push({tk:x?x.tk:t,sec:x?x.sec:null,rank:x&&x.rank?x.rank:null,rsl:x?x.rsl:null,ue:x?x.ue:null,held:true});
-  if(!x){unk.push(t);return}var c=cnt[x.sec]||0;if(!c)dist++;cnt[x.sec]=c+1});
- var warn=[];if(n>5)Object.keys(cnt).forEach(function(k){if(cnt[k]>cap)warn.push("Dein Depot hat "+cnt[k]+"× "+k+" (Regel: max. "+cap+")")});
- if(n<=5&&dist+Math.max(0,n-sel.length)<minS)warn.push("Mit deinem Depot sind "+minS+" Sektoren nicht mehr erreichbar");
- R.forEach(function(x){if(sel.length>=n||x.hold)return;var why=null;
-  if(x.rsl<=1)why="RSL ≤ 1";else if(ex&&x.ue)why="⚠ Übernahme?";
-  else{var c=cnt[x.sec]||0,nd=dist+(c?0:1);if(c>=cap)why=x.sec+" bereits "+cap+"×";else if(nd+(n-sel.length-1)<minS)why="Sektor-Mindestzahl";
-   if(!why){sel.push(x);add.push(x);x.sel=true;cnt[x.sec]=c+1;dist=nd;return}}
-  sk.push({x:x,why:why})});
- var last=add.length?add[add.length-1].rank:0;sk=sk.filter(function(k){return k.x.rank<last});
- document.getElementById("prule").textContent=n<=5?"Regel: mindestens 3 verschiedene Sektoren":"Regel: höchstens 2 Aktien pro Sektor";
- var i=0;document.getElementById("pl").innerHTML=sel.map(function(x){var sc=x.sec?'<span class="dot" style="background:'+col(x.sec)+'"></span>'+x.sec:"nicht im Datensatz";
-  return'<div class="chip'+(x.held?' held':'')+'"><em>'+(x.held?"●":++i)+'</em><b>'+flag(x)+' '+dsp(x)+ue(x)+'</b><span>'+sc+'</span><small>'+(x.held?"im Depot":"neu")+(x.rank?" · Rang "+x.rank:"")+(x.rsl?" · RSL "+f4(x.rsl):"")+'</small></div>'}).join("");
- var sm=Object.keys(cnt).map(function(k){return k+" "+cnt[k]+"×"}).join(" · ");
- document.getElementById("pnote").textContent=warn.join(" · ")+(warn.length?" · ":"")+(sel.length>=n&&!add.length&&H.length>=n?"Dein Depot ist bereits voll ("+H.length+" von "+n+"). ":sel.length<n?"Nur "+sel.length+" von "+n+" Plätzen lassen sich regelkonform füllen. ":"")+"Sektoren: "+(sm||"–")+(unk.length?" · ohne Sektor (nicht im Datensatz): "+unk.join(", "):"")+(sk.length?" · Übersprungen: "+sk.map(function(k){return dsp(k.x)+" ("+k.why+")"}).join(", "):"")}
+/* Daten laden */
 function fd(t){return t.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"})}
 function nxt(d){var t=new Date(d+"T12:00:00");t.setDate(t.getDate()+1);if(t.getDay()==6)t.setDate(t.getDate()+2);else if(t.getDay()==0)t.setDate(t.getDate()+1);return t}
 function fallback(){PREVD=[];var saved=null;try{saved=localStorage.getItem("rsl_data")}catch(e){}load(saved||DEMO)}
-function mapRows(j){return j.rows.map(function(x){return{tk:x.tk,nm:x.n||"",sec:x.sec,cl:x.cl,sma:x.sma,rsl:x.cl/x.sma,r26:x.s26?x.cl/x.s26:null,d1:x.d1,w1:x.w1,m1:x.m1,ue:x.ue||null,mk:x.mk||"S&P 500",ix:x.ix||[x.mk||"S&P 500"]}}).sort(function(a,b){return b.rsl-a.rsl})}
-function getj(d){return fetch("data_alle/"+d+".json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()})}
+function mapRows(j){return j.rows.map(function(x){return{tk:x.tk,nm:x.n||"",sec:x.sec,cl:x.cl,sma:x.sma,s26:x.s26||null,rsl:x.cl/x.sma,r26:x.s26?x.cl/x.s26:null,d1:x.d1,w1:x.w1,m1:x.m1,
+ rsi:x.rsi,macd:x.macd,sig:x.sig,tq:x.tq,gw:x.gw,tqd:x.tqd,gd:x.gd,y:x.y||null,pe:x.pe==null?null:x.pe,ks:x.ks||null,ue:x.ue||null,mk:x.mk||"S&P 500",ix:x.ix||[x.mk||"S&P 500"]}}).sort(function(a,b){return b.rsl-a.rsl})}
+function getj(d){return fetch(DATADIR+d+".json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()})}
 function loadDate(d){CUR=d;var t=new Date(d+"T12:00:00");t.setDate(t.getDate()-7);var tg=t.toISOString().slice(0,10);var pd=IDX.find(function(x){return x<=tg});
  Promise.all([getj(d),pd?getj(pd).catch(function(){return null}):Promise.resolve(null)]).then(function(a){UPD=a[0].updated;PREVD=a[1]?mapRows(a[1]):[];D=mapRows(a[0]);render()}).catch(fallback)}
 document.getElementById("dsel").onchange=function(){loadDate(this.value)};
-fetch("data_alle/index.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
- IDX=j.dates;var sel=document.getElementById("dsel");sel.innerHTML=j.dates.map(function(d,i){return '<option value="'+d+'">'+fd(nxt(d))+' – 10:00 Uhr (Schluss '+fd(new Date(d+"T12:00:00"))+')'+(i?'':' · aktuell')+'</option>'}).join("");
+fetch(DATADIR+"index.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+ IDX=j.dates;var sel=document.getElementById("dsel");sel.innerHTML=j.dates.map(function(d,i){return'<option value="'+d+'">'+fd(nxt(d))+" – 10:00 Uhr (Schluss "+fd(new Date(d+"T12:00:00"))+")"+(i?"":" · aktuell")+"</option>"}).join("");
  sel.style.display="";loadDate(j.dates[0])}).catch(fallback);
 </script>
 </body>
