@@ -546,9 +546,12 @@ def indicators(px):
     return rsi, macd, sig
 
 def efficiency(df):
-    """Trendqualitaet: Nettoveraenderung / Summe der absoluten Schritte, mit Vorzeichen (-1 bis +1)."""
-    den = df.diff().iloc[1:].abs().sum()
-    return ((df.iloc[-1] - df.iloc[0]) / den).where(df.notna().all() & (den > 0))
+    """Trendqualitaet: Efficiency Ratio nach Kaufman (Nettoveraenderung / Summe der Schritte), mit Vorzeichen, korrigiert um den Anteil des groessten Einzelschritts."""
+    step = df.diff().iloc[1:].abs()
+    den = step.sum()
+    er = (df.iloc[-1] - df.iloc[0]) / den
+    share = step.max() / den  # Anteil des groessten Einzelschritts (Woche bzw. Tag)
+    return (er * (1 - share)).where(df.notna().all() & (den > 0))
 
 def download_m(chunk):
     for _ in range(3):
@@ -585,7 +588,14 @@ def prep_extras(px):
     else:
         print("Hinweis: keine Monatsdaten - Mindset-Indikator entfaellt")
     print("Zusatzdaten: Jahresschluesse fuer", sorted(yend))
-    return {"rsi": rsi, "macd": macd, "sig": sig, "yret": yret, "yend": yend}
+    hd = list(px.index[-(TAGE + 5):])
+    hw, ht = {}, {}
+    for dd in hd:
+        s_ = px[px.index <= dd]
+        last = s_.ffill().iloc[-1]
+        hw[dd] = (last / s_.resample("W-FRI").last().tail(26).mean()).to_dict()
+        ht[dd] = (last / s_.tail(26).mean()).to_dict()
+    return {"rsi": rsi, "macd": macd, "sig": sig, "yret": yret, "yend": yend, "hd": hd, "hw": hw, "ht": ht}
 
 def day_extras(px, sub, ret, d, close, sma, pre):
     """Kennzahlen fuer einen Stichtag: Trendqualitaet, groesste Einzelbewegung, Kurssprung-Verdacht."""
@@ -607,6 +617,9 @@ def day_extras(px, sub, ret, d, close, sma, pre):
             ks[tk] = [round(float(g), 1), w.index[kpos[j]].strftime("%Y-%m-%d")]
     out["ks"] = ks
     Y = d.year
+    if d in pre["hd"] and pre["hd"].index(d) >= 5:
+        win = pre["hd"][pre["hd"].index(d) - 5: pre["hd"].index(d) + 1]
+        out["hw"], out["ht"] = [pre["hw"][x] for x in win], [pre["ht"][x] for x in win]
     out["years"] = [pre["yret"].get(yr) for yr in range(2021, Y)]
     out["pe"] = pre["yend"].get(Y - 1)
     return out
@@ -620,6 +633,12 @@ def add_extras(row, tk, ex):
         put(k, ex.get(k), nd)
     if tk in ex["ks"]:
         row["ks"] = ex["ks"][tk]
+    for key, name in (("hw", "h"), ("ht", "ht")):
+        seq = ex.get(key)
+        if seq:
+            vals = [m.get(tk) for m in seq]
+            if all(v is not None and v == v for v in vals):
+                row[name] = [round(float(v), 3) for v in vals]
     if ex["pe"] and ex["years"] and all(y is not None for y in ex["years"]):
         ys = [y.get(tk) for y in ex["years"]]
         pe = ex["pe"].get(tk)

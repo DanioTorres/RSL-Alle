@@ -6,10 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>RSL Dashboard Alle</title>
 <style>
-:root{--bg:#f6f5fb;--tabbg:rgba(255,255,255,.6);--bgg:linear-gradient(135deg,#ffe6f0 0%,#efe8ff 45%,#d9f3ff 100%);--pa:#ffffff;--tx:#1b1530;--mu:#6e6a85;--bd:#e5e2f0;--ac:#7c3aed;--ac2:#f43f5e;--up:#00a884;--dn:#f43f5e;--bar:#ece9f6;--ink:#1b1530;--r:18px;--sh:0 1px 2px rgba(27,21,48,.04),0 8px 24px rgba(27,21,48,.06);
+:root{--bg:#f3f5f8;--tabbg:rgba(255,255,255,.6);--bgg:none;--pa:#ffffff;--tx:#1a2230;--mu:#64718a;--bd:#dfe4ec;--ac:#1d5fd6;--ac2:#3b82f6;--up:#00a884;--dn:#e0482b;--bar:#e8edf3;--ink:#1a2230;--r:18px;--sh:0 1px 2px rgba(20,32,56,.04),0 8px 24px rgba(20,32,56,.06);
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0b14;--tabbg:rgba(255,255,255,.08);--bgg:linear-gradient(135deg,#2a1148 0%,#14193a 55%,#0b2a36 100%);--pa:#171421;--tx:#ece9f7;--mu:#9a95b3;--bd:#2a2538;--ac:#a78bfa;--ac2:#fb7185;--up:#34d399;--dn:#fb7185;--bar:#241f33;--ink:#ece9f7;--sh:0 8px 28px rgba(0,0,0,.35)}}
-:root[data-theme="dark"]{--bg:#0d0b14;--tabbg:rgba(255,255,255,.08);--bgg:linear-gradient(135deg,#2a1148 0%,#14193a 55%,#0b2a36 100%);--pa:#171421;--tx:#ece9f7;--mu:#9a95b3;--bd:#2a2538;--ac:#a78bfa;--ac2:#fb7185;--up:#34d399;--dn:#fb7185;--bar:#241f33;--ink:#ece9f7;--sh:0 8px 28px rgba(0,0,0,.35)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f141b;--tabbg:rgba(255,255,255,.08);--bgg:none;--pa:#161c25;--tx:#e6ebf3;--mu:#8a97ab;--bd:#263040;--ac:#6ea8ff;--ac2:#8ab8ff;--up:#34d399;--dn:#ff7a66;--bar:#202938;--ink:#e6ebf3;--sh:0 8px 28px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#0f141b;--tabbg:rgba(255,255,255,.08);--bgg:none;--pa:#161c25;--tx:#e6ebf3;--mu:#8a97ab;--bd:#263040;--ac:#6ea8ff;--ac2:#8ab8ff;--up:#34d399;--dn:#ff7a66;--bar:#202938;--ink:#e6ebf3;--sh:0 8px 28px rgba(0,0,0,.35)}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;background:var(--bg);background-image:var(--bgg);background-attachment:fixed;color:var(--tx);font:14px/1.45 "Segoe UI Variable","Segoe UI",system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums}
 .w{max-width:1500px;margin:0 auto;padding:28px 18px 48px}
@@ -22,7 +22,7 @@ button{cursor:pointer}button:hover,input:focus,select:focus{border-color:var(--a
 button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 .tabs{display:inline-flex;gap:0;margin:22px 0 16px;background:var(--tabbg);backdrop-filter:blur(6px);border-radius:999px;padding:4px;flex-wrap:wrap}
 .tabs button{border:0;background:transparent;color:var(--mu);font-weight:600}
-.tabs button.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 4px 14px rgba(124,58,237,.35)}
+.tabs button.on{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 4px 14px rgba(29,95,214,.3)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));background:var(--pa);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;overflow:hidden}
 .kpi{padding:16px 20px;border-right:1px solid var(--bd)}.kpi:last-child{border-right:0}
 .kpi small{display:block;color:var(--mu);font-size:12px;margin-bottom:4px}.kpi b{font-size:28px;font-weight:700;letter-spacing:-.02em}
@@ -78,38 +78,22 @@ tr.out td{background:rgba(245,211,74,.22)}tr.lo td{background:rgba(224,72,43,.06
 .sb{display:inline-block;padding:2px 9px;border-radius:6px;font-weight:700;font-size:12px}.sb.u{background:rgba(0,168,132,.16);color:var(--up)}.sb.d{background:rgba(224,72,43,.16);color:var(--dn)}
 .ma{font-size:18px;font-weight:800;line-height:1}.ma.u2,.ma.u1{color:var(--up)}.ma.fl{color:var(--mu)}.ma.d1,.ma.d2{color:var(--dn)}
 .wl{cursor:pointer;font-size:17px;color:var(--mu);user-select:none}.wl.w{color:#f59e0b}.wl.t{color:#3b82f6}.wl.b{background:linear-gradient(90deg,#f59e0b 50%,#3b82f6 50%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.mover{background:var(--ink);color:var(--bg);border-radius:var(--r);margin-bottom:12px;overflow:hidden}.mover summary{padding:14px 20px;font-weight:700;font-size:15px;cursor:pointer;color:var(--bg)}
-.mvb{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;padding:4px 20px 16px;background:var(--pa);color:var(--tx)}.mvb h4{margin:12px 0 6px;font-size:13px}.mv{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--bd);font-size:13px}
 .disc{color:var(--mu);font-size:11px;margin:14px 0 0}
 th[data-t],td [data-t]{cursor:help}
 td small{font-weight:700;font-size:11px}
 @media print{.toolbar,.ctl,.plan,.mover,.tabs,.hb,#tip,details,.warn{display:none!important}body{background:#fff!important}.tw{max-height:none!important;overflow:visible!important;box-shadow:none}table{min-width:0}}
-td:first-child{color:var(--mu)}td.sy{font-weight:700}td.sy a{font-weight:700}table{min-width:1400px}
-.hb{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.toolbar{display:flex;gap:12px 20px;align-items:center;flex-wrap:wrap;background:var(--pa);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:12px 18px;margin-bottom:12px}
-.tl{font-size:12px;font-weight:700;color:var(--mu);margin-right:8px}
-.seg{display:inline-flex;background:var(--bar);border-radius:999px;padding:3px}.seg button{border:0;background:transparent;color:var(--mu);font-weight:700;padding:5px 15px}.seg button.on{background:var(--ac);color:#fff}
-.sw{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600}.sw input{display:none}.sw i{width:36px;height:20px;border-radius:999px;background:var(--bar);position:relative;transition:.15s;flex:none}.sw i:after{content:"";position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.15s}.sw input:checked+i{background:var(--ac)}.sw input:checked+i:after{left:18px}
-.toolbar.noext .ext-only{display:none}
-#tip{position:fixed;display:none;z-index:50;max-width:350px;background:var(--pa);color:var(--tx);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:10px 13px;font-size:12px;line-height:1.5;pointer-events:none}
-#tip .tt{display:block;font-size:13px;margin-bottom:4px}#tip p{margin:6px 0 0}#tip .ts{color:var(--mu)}#tip .mt{border-collapse:collapse;width:100%;min-width:0;margin-top:6px}#tip .mt td{padding:1px 6px 1px 0;border:0}
-.mb{display:inline-block;height:7px;border-radius:2px;vertical-align:middle}.mb.p{background:var(--up)}.mb.n{background:var(--dn)}
-[data-t]{cursor:help}
-.pill{display:inline-block;margin-left:7px;padding:1px 9px;border-radius:999px;background:#f5d34a;color:#4a3b00;font-size:11px;font-weight:700;vertical-align:1px}
-tr.out td{background:rgba(245,211,74,.22)}tr.lo td{background:rgba(224,72,43,.06)}
-.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--mu);margin:0 0 8px}.legend i{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:6px;vertical-align:-2px;border:1px solid var(--bd)}
-.tt2{margin:6px 0 2px;font-size:20px;letter-spacing:-.02em}.tt2 small{font-size:12px;font-weight:400;color:var(--mu);margin-left:8px;letter-spacing:0}
-.tqc{display:inline-block;min-width:50px;text-align:center;padding:2px 8px;border-radius:8px;font-weight:700}.tqc.p{background:rgba(0,168,132,.18);color:var(--up)}.tqc.n{background:rgba(224,72,43,.16);color:var(--dn)}.tqc.z{background:var(--bar);color:var(--mu)}
-.ri{display:inline-block;min-width:44px;text-align:center;padding:2px 6px;border-radius:6px}.ri.hi{background:rgba(224,72,43,.2);color:var(--dn);font-weight:700}.ri.lw{background:rgba(0,168,132,.2);color:var(--up);font-weight:700}
-.sb{display:inline-block;padding:2px 9px;border-radius:6px;font-weight:700;font-size:12px}.sb.u{background:rgba(0,168,132,.16);color:var(--up)}.sb.d{background:rgba(224,72,43,.16);color:var(--dn)}
-.ma{font-size:18px;font-weight:800;line-height:1}.ma.u2,.ma.u1{color:var(--up)}.ma.fl{color:var(--mu)}.ma.d1,.ma.d2{color:var(--dn)}
-.wl{cursor:pointer;font-size:17px;color:var(--mu);user-select:none}.wl.w{color:#f59e0b}.wl.t{color:#3b82f6}.wl.b{background:linear-gradient(90deg,#f59e0b 50%,#3b82f6 50%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.mover{background:var(--ink);color:var(--bg);border-radius:var(--r);margin-bottom:12px;overflow:hidden}.mover summary{padding:14px 20px;font-weight:700;font-size:15px;cursor:pointer;color:var(--bg)}
-.mvb{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;padding:4px 20px 16px;background:var(--pa);color:var(--tx)}.mvb h4{margin:12px 0 6px;font-size:13px}.mv{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid var(--bd);font-size:13px}
-.disc{color:var(--mu);font-size:11px;margin:14px 0 0}
-th[data-t],td [data-t]{cursor:help}
-td small{font-weight:700;font-size:11px}
-@media print{.toolbar,.ctl,.plan,.mover,.tabs,.hb,#tip,details,.warn{display:none!important}body{background:#fff!important}.tw{max-height:none!important;overflow:visible!important;box-shadow:none}table{min-width:0}}
+
+.mover{color:var(--tx);background:var(--pa);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:12px}
+.mover summary{color:var(--tx);list-style:none;padding:16px 22px;font-weight:700;font-size:19px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.mover summary::-webkit-details-marker{display:none}.mover summary:after{content:"⌄";font-size:22px;color:var(--mu);transition:.15s}.mover[open] summary:after{transform:rotate(180deg)}
+.mvb{display:grid;grid-template-columns:1fr 1fr;gap:22px;padding:4px 22px 18px}@media(max-width:1000px){.mvb{grid-template-columns:1fr}}
+.mvb h4{margin:6px 0 10px;font-size:19px;font-weight:700}.mvb h4.up{color:#2563eb}.mvb h4.dn{color:var(--dn)}
+.mc{display:grid;grid-template-columns:minmax(110px,1fr) 236px 150px;gap:10px;align-items:center;border:1px solid var(--bd);border-radius:12px;padding:12px 16px;margin-bottom:10px;background:var(--pa)}
+.mc b{font-size:16px}.mc .mn{text-align:right}.mc .mn b{font-size:19px;display:block}.mc .ts{color:var(--mu);font-size:12px}
+.mf{grid-column:1/-1;color:var(--mu);font-size:11px;margin:2px 0 0}.mmore{grid-column:1/-1;justify-self:start}
+.tqi{margin:4px 0 8px}.tqi summary{color:var(--ac);font-size:13px;cursor:pointer;font-weight:600}.tqi p{margin:8px 0;font-size:13px}.tqi .ts{color:var(--mu);font-size:12px}
+.tqe{display:flex;gap:8px 20px;flex-wrap:wrap;align-items:center;font-size:13px;margin:10px 0}.tqe .tqc{margin-right:6px}
+.tqw{border-left:3px solid var(--bd);background:var(--bar);border-radius:6px;padding:10px 14px;margin:10px 0;font-size:13px}.tqw p{margin:6px 0 0}
 td:first-child{color:var(--mu)}td.sy{font-weight:700}td.sy a{font-weight:700}table{min-width:1200px}.w{max-width:1760px}td{padding:8px 8px}th{padding:11px 8px}.g{width:96px}.nm{max-width:170px}
 </style>
 </head>
@@ -141,6 +125,7 @@ td:first-child{color:var(--mu)}td.sy{font-weight:700}td.sy a{font-weight:700}tab
  <select id="so"><option value="rank">Sortierung: Rank</option><option value="tk">Sortierung: Ticker</option><option value="sec">Sortierung: Sektor</option><option value="low">Sortierung: schwächster RSL</option></select>
 </div>
 <h2 class="tt2" id="tt"></h2>
+<details class="tqi" id="tqinfo"><summary>Was bedeutet die Trendqualität?</summary><div id="tqb"></div></details>
 <div class="legend"><span>Farben:</span><span><i style="background:rgba(0,168,132,.35)"></i>TOP 5 in beiden Basis-Varianten (26 Tage &amp; 26 Wochen)</span><span><i style="background:rgba(0,168,132,.14)"></i>TOP 5 in einer Basis-Variante</span><span><i style="background:rgba(224,72,43,.14)"></i>Untere 75 % (Plätze 6–20)</span><span><i style="background:rgba(245,211,74,.5)"></i>Ausreißer</span></div>
 <div class="tw"><table><thead id="hd"></thead><tbody id="tb"></tbody></table></div>
 <div class="foot"><span>RSL = Kurs / SMA26. ★ = Portfolio-Vorschlag, ● = Position in deinem Depot, Δ = Platzveränderung zur Vorwoche. Fahre mit der Maus über Spaltenköpfe, Werte und Schalter für Erklärungen.</span><span id="cnt"></span></div>
@@ -156,7 +141,7 @@ td:first-child{color:var(--mu)}td.sy{font-weight:700}td.sy a{font-weight:700}tab
 <script>
 var DATADIR="data_alle/";
 var DEMO="MRNA;Healthcare;218.01;97.00\nMPC;Energy;478.07;319.62\nVEEV;Healthcare;310.36;214.40\nVLO;Energy;444.71;312.27\nPSX;Energy;293.17;212.03\nPTC;Technology;192.98;140.24\nILMN;Healthcare;262.54;193.99\nP;Technology;124.01;91.81\nACN;Technology;229.68;171.00\nRVTY;Healthcare;152.64;116.61\nCRL;Healthcare;300.15;234.09\nAPA;Energy;49.15;39.09\nIT;Technology;205.35;164.69\nTMO;Healthcare;690.00;553.95\nMTD;Healthcare;1622.29;1314.82\nA;Healthcare;172.97;140.31\nXOM;Energy;118.40;112.10\nAAPL;Technology;231.50;224.80\nKO;Consumer Staples;68.20;69.90\nNKE;Consumer Discretionary;72.10;81.40\nPFE;Healthcare;24.80;26.10\nINTC;Technology;21.30;23.40";
-var D=[],mk="S&P 500",BASE="W",EXT=true,IND=true,TQ=true,HOUT=true,UPD=null,CUR=null,IDX=[],PREVD=[],WL={},RM={},LA=[];
+var D=[],mk="S&P 500",BASE="W",EXT=true,IND=true,TQ=true,HOUT=true,UPD=null,CUR=null,IDX=[],PREVD=[],WL={},RM={},LA=[],PDATE=null,MVN=3;
 try{WL=JSON.parse(localStorage.getItem("rsl_wl")||"{}")}catch(e){}
 var cols=["#9b59b6","#d35400","#16a085","#2980b9","#c0392b","#7f8c8d","#b8860b","#8e44ad"],cc={};
 function col(s){if(!cc[s])cc[s]=cols[Object.keys(cc).length%cols.length];return cc[s]}
@@ -212,6 +197,11 @@ function tqInfo(x){var T=BASE==="T",v=T?x.tqd:x.tq,g=T?x.gd:x.gw;if(v==null)retu
  var lab=v>=0.35?"stetiger Aufwärtstrend":v>=0.15?"überwiegend aufwärts":v>-0.15?"kein klarer Trend":v>-0.35?"überwiegend abwärts":"stetiger Abwärtstrend";
  return{v:v,g:g,lab:lab,cls:v>=0.15?"p":v<=-0.15?"n":"z",T:T}}
 function tqTip(x){var t=tqInfo(x);if(!t)return"";return'<b class="tt">Trendqualität '+n2(t.v,2)+' — '+t.lab+'</b>'+(t.g!=null?'Größte Einzel'+(t.T?"tag":"woche")+': '+n2(t.g,1)+'%<br>':'')+'Messzeitraum: letzte 26 '+(t.T?"Tage":"Wochen")}
+function tqBox(){var T=BASE==="T",z=T?"26 Tage":"26 Wochen",o=T?"26 Wochen":"26 Tage",e=T?"Einzeltag":"Einzelwoche";
+ return'<p>Die Trendqualität zeigt, wie <b>zielgerichtet</b> sich ein Kurs über die letzten '+z+' bewegt hat – und <b>in welche Richtung</b>. Ein hoher positiver Wert steht für einen stetigen Anstieg mit wenig Rückschlägen; ein <b>negativer Wert für einen stetigen Abwärtstrend</b>. Werte um 0 bedeuten: kein klarer Trend. Sie ergänzt den RSL: Der <b>RSL misst die Stärke</b>, die <b>Trendqualität die Güte und Richtung des Verlaufs</b>.</p>'+
+ '<div class="tqe"><span><span class="tqc n">−0.45</span> stetiger ABWÄRTSTREND – der Kurs fällt gleichmäßig</span><span><span class="tqc z">0.00</span> kein klarer Trend – viel Hin und Her</span><span><span class="tqc p">+0.45</span> stetiger AUFWÄRTSTREND über viele '+(T?"Tage":"Wochen")+'</span></div>'+
+ '<div class="tqw"><b>Wichtig: Messzeitraum sind die letzten '+z+'</b><p>Die Trendqualität nutzt <b>immer dieselbe Zeitebene wie der RSL</b>. Du hast oben <b>'+z+'</b> gewählt – die Kennzahl betrachtet daher ausschließlich diesen Zeitraum. Schaltest du auf <b>'+o+'</b> um, wird auch die Trendqualität auf '+o+' berechnet. Ereignisse davor fließen <b>nicht</b> ein; für die längerfristige Einordnung lohnt sich ein Blick auf den Chart (Klick auf das Kürzel).</p></div>'+
+ '<p class="ts">Methodische Kennzahl auf Basis der Efficiency Ratio nach Kaufman, korrigiert um den Anteil der größten '+e+'. Fahre über einen Wert, um den größten '+(T?"Tagessprung":"Wochensprung")+' zu sehen. Die Kennzahl beschreibt den bisherigen Kursverlauf, ist keine Aussage über die künftige Entwicklung und keine Anlageempfehlung.</p>'}
 /* Tooltips */
 var STAT={
 "h:wl":'<b class="tt">Watchlist:</b>Klicke auf ☆ um Aktien zu speichern',
@@ -272,9 +262,9 @@ function render(){
  ms.concat(ms.length>1?["Alle"]:[]).forEach(function(m){var n=D.filter(function(x){return inM(x,m)}).length;
   var b=document.createElement("button");b.textContent=m+" ("+n+")";if(m===mk)b.className="on";b.onclick=function(){mk=m;render()};T.appendChild(b)});
  T.style.display=ms.length>1?"":"none";
- var all=cur(),rkW=ranks(all,fW),rkT=ranks(all,fT),pv=PREVD.filter(function(x){return inM(x,mk)}),pW=ranks(pv,fW),pT=ranks(pv,fT);
+ var all=cur(),rkW=ranks(all,fW),rkT=ranks(all,fT),pv=PREVD.filter(function(x){return inM(x,mk)}),pW=ranks(pv,fW),pT=ranks(pv,fT),pvr={};pv.forEach(function(x){pvr[x.tk]=BASE==="T"?x.r26:x.rsl});
  var act=BASE==="T"?rkT:rkW,pAct=BASE==="T"?pT:pW,oth=BASE==="T"?rkW:rkT,pOth=BASE==="T"?pW:pT;
- var R=all.filter(function(x){return act[x.tk]}).map(function(x){var o=Object.assign({},x);o.rW=x.rsl;o.rT=x.r26;o.rsl=BASE==="T"?x.r26:x.rsl;o.rank=act[x.tk];o.rkO=oth[x.tk]||null;
+ var R=all.filter(function(x){return act[x.tk]}).map(function(x){var o=Object.assign({},x);o.rW=x.rsl;o.rT=x.r26;o.rsl=BASE==="T"?x.r26:x.rsl;o.rank=act[x.tk];o.rkO=oth[x.tk]||null;o.pr=pvr[x.tk]!=null?pvr[x.tk]:null;
   o.dr=PREVD.length?(pAct[x.tk]?pAct[x.tk]-o.rank:"neu"):null;o.drO=(o.rkO&&pOth[x.tk])?pOth[x.tk]-o.rkO:null;
   var a=rkW[x.tk]<=5,b=rkT[x.tk]<=5;o.hl=a&&b?2:(a||b)?1:0;o.out=!!(x.ue||x.ks);return o});
  R.sort(function(a,b){return a.rank-b.rank});RM={};R.forEach(function(x){RM[x.tk]=x});
@@ -299,13 +289,21 @@ function render(){
  var upd=UPD?String(UPD).replace("Handelsschluss ",""):"";
  document.getElementById("tt").innerHTML=(mk==="Alle"?"Alle Indizes":mk)+", "+(BASE==="T"?"26 Tage":"26 Wochen")+(upd?'<small>Kurse vom '+upd+' (Schlusskurs)</small>':"");
  document.getElementById("stand").textContent=(UPD&&CUR?"Stand: "+fd(nxt(CUR))+", 10:00 Uhr · "+UPD:UPD?"Datenstand: "+UPD:"Demo-/Importdaten")+" · "+D.length+" Aktien"}
-function movers(R){var el=document.getElementById("mvb");document.getElementById("mvs").textContent="RSL Top Mover (5 Tage) – "+(mk==="Alle"?"Alle Indizes":mk);
+function dmy4(s){return s.slice(8,10)+"."+s.slice(5,7)+"."+s.slice(0,4)}
+function spark(vals,up){var W=236,H=62,p=4,mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),pad=((mx-mn)||0.02)*0.12;mn-=pad;mx+=pad;
+ var Y=function(v){return(H-p-(v-mn)/(mx-mn)*(H-2*p)).toFixed(1)};
+ var pts=vals.map(function(v,i){return[(p+i*(W-2*p)/(vals.length-1)).toFixed(1),Y(v)]});
+ var line=pts.map(function(q){return q.join(",")}).join(" "),area="M"+pts[0].join(",")+" L"+pts.slice(1).map(function(q){return q.join(",")}).join(" L")+" L"+pts[pts.length-1][0]+","+(H-p)+" L"+pts[0][0]+","+(H-p)+" Z";
+ var one=(1>=mn&&1<=mx)?'<line x1="'+p+'" x2="'+(W-p)+'" y1="'+Y(1)+'" y2="'+Y(1)+'" stroke="#8a97a8" stroke-dasharray="3 3" stroke-width="1"/>':"";
+ return'<svg viewBox="0 0 '+W+' '+H+'" width="'+W+'" height="'+H+'" style="max-width:100%"><path d="'+area+'" fill="'+(up?"rgba(0,168,132,.16)":"rgba(224,72,43,.16)")+'"/>'+one+'<polyline points="'+line+'" fill="none" stroke="'+(up?"#0b8f4a":"#d92d20")+'" stroke-width="2" stroke-linejoin="round"/></svg>'}
+function movers(R){var el=document.getElementById("mvb"),nm=(mk==="Alle"?"Alle Indizes":mk);document.getElementById("mvs").textContent="RSL Top Mover (5 Tage) – "+nm;
  if(!PREVD.length){el.innerHTML='<p class="sub">Für diesen Stichtag gibt es noch keinen Vergleich zur Vorwoche.</p>';return}
- var ok=function(x){return!(HOUT&&x.out)},num2=function(x){return typeof x.dr==="number"};
- var up=R.filter(function(x){return ok(x)&&num2(x)&&x.dr>0&&x.rank<=100}).sort(function(a,b){return b.dr-a.dr}).slice(0,5);
- var dn=R.filter(function(x){return ok(x)&&num2(x)&&x.dr<0&&x.rank-x.dr<=100}).sort(function(a,b){return a.dr-b.dr}).slice(0,5);
- function li(x){return'<div class="mv"><span>'+flag(x)+' <b>'+dsp(x)+'</b> <span class="mu">'+(x.nm||"")+'</span></span><span>Platz '+(x.rank+x.dr)+' → '+x.rank+' <b class="'+(x.dr>0?"pos":"neg")+'">'+(x.dr>0?"▲ ":"▼ ")+Math.abs(x.dr)+'</b></span></div>'}
- el.innerHTML='<div><h4>Größte Aufsteiger (Top 100)</h4>'+(up.map(li).join("")||'<p class="sub">–</p>')+'</div><div><h4>Größte Absteiger (aus den Top 100)</h4>'+(dn.map(li).join("")||'<p class="sub">–</p>')+'</div>'}
+ var ok=function(x){return!(HOUT&&x.out)&&typeof x.dr==="number"};
+ var up=R.filter(function(x){return ok(x)&&x.dr>0}).sort(function(a,b){return b.dr-a.dr}).slice(0,MVN);
+ var dn=R.filter(function(x){return ok(x)&&x.dr<0}).sort(function(a,b){return a.dr-b.dr}).slice(0,MVN);
+ function li(x,u){var h=BASE==="T"?x.ht:x.h,vals=h&&h.length>1?h:(x.pr!=null?[x.pr,x.rsl]:null);
+  return'<div class="mc"><div><b>'+flag(x)+' '+dsp(x)+'</b><div class="ts">'+(x.nm||"")+'</div><div class="ts">Rang #'+(x.rank+x.dr)+' → #'+x.rank+'</div></div><div>'+(vals?spark(vals,u):"")+'</div><div class="mn"><b class="'+(u?"pos":"neg")+'">'+(u?"+":"−")+Math.abs(x.dr)+' Plätze</b><div class="ts">RSL '+(x.pr!=null?n2(x.pr,2)+" → ":"")+n2(x.rsl,2)+'</div></div></div>'}
+ el.innerHTML='<div><h4 class="up">Aufsteiger</h4>'+(up.map(function(x){return li(x,true)}).join("")||'<p class="sub">–</p>')+'</div><div><h4 class="dn">Absteiger</h4>'+(dn.map(function(x){return li(x,false)}).join("")||'<p class="sub">–</p>')+'</div><p class="mf">'+nm+' • Vergleich: '+(PDATE?dmy4(PDATE):"–")+' → '+(CUR?dmy4(CUR):"–")+' • Diagramm: RSL je Tag</p><button class="mmore" id="mvmore">'+(MVN>3?"Weniger anzeigen":"Mehr anzeigen")+'</button>'}
 function colset(){var c=[{k:"rank",l:"Rang"},{k:"wl",l:"WL",t:"wl"}];
  if(EXT)c.push({k:"dl",l:"Δ "+(BASE==="T"?"26W":"26T"),t:"dl"});
  c.push({k:"sym",l:"Symbol"},{k:"nm",l:"Name"},{k:"sec",l:"Sektor"});
@@ -337,7 +335,7 @@ function table(){
  var q=document.getElementById("q").value.trim().toUpperCase(),s=document.getElementById("sf").value,o=document.getElementById("so").value,wlo=document.getElementById("wlo").checked;
  var A=(window.R||[]).filter(function(x){return(!q||x.tk===q||dsp(x)===q)&&(!s||x.sec===s)&&!(HOUT&&x.out)&&(!wlo||WL[x.tk])});
  if(o==="tk")A.sort(function(a,b){return a.tk<b.tk?-1:1});if(o==="sec")A.sort(function(a,b){return a.sec<b.sec?-1:1});if(o==="low")A.sort(function(a,b){return a.rsl-b.rsl});
- var mx=window.R&&window.R.length?window.R[0].rsl:2,C=colset();LA=A;
+ var mx=window.R&&window.R.length?window.R[0].rsl:2,C=colset();LA=A;document.getElementById("tqinfo").style.display=(EXT&&TQ)?"":"none";document.getElementById("tqb").innerHTML=tqBox();
  document.getElementById("hd").innerHTML="<tr>"+C.map(function(c){return"<th"+(c.a?' style="text-align:right"':"")+(c.t?' data-t="h:'+c.t+'"':"")+">"+c.l+"</th>"}).join("")+"</tr>";
  document.getElementById("tb").innerHTML=A.map(function(x){
   return'<tr class="'+(x.out?"out":"h"+x.hl+(x.rank>5&&x.rank<=20?" lo":""))+'">'+C.map(function(c){return cell(c.k,x,mx)}).join("")+"</tr>"}).join("");
@@ -358,6 +356,7 @@ document.getElementById("tb").onclick=function(e){var k=e.target.getAttribute&&e
 function dl(name,text){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:"text/plain"}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
 document.getElementById("tex").onclick=function(){dl("rsl_ticker.txt",LA.map(tvs).join(","))};
 document.getElementById("pdf").onclick=function(){window.print()};
+document.getElementById("mvb").onclick=function(e){if(e.target&&e.target.id==="mvmore"){MVN=MVN>3?3:10;movers(window.R)}};
 var dlg=document.getElementById("dlg"),ta=document.getElementById("ta");
 document.getElementById("imp").onclick=function(){dlg.showModal()};
 document.getElementById("cl").onclick=function(){dlg.close()};
@@ -371,10 +370,10 @@ function fd(t){return t.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit
 function nxt(d){var t=new Date(d+"T12:00:00");t.setDate(t.getDate()+1);if(t.getDay()==6)t.setDate(t.getDate()+2);else if(t.getDay()==0)t.setDate(t.getDate()+1);return t}
 function fallback(){PREVD=[];var saved=null;try{saved=localStorage.getItem("rsl_data")}catch(e){}load(saved||DEMO)}
 function mapRows(j){return j.rows.map(function(x){return{tk:x.tk,nm:x.n||"",sec:x.sec,cl:x.cl,sma:x.sma,s26:x.s26||null,rsl:x.cl/x.sma,r26:x.s26?x.cl/x.s26:null,d1:x.d1,w1:x.w1,m1:x.m1,
- rsi:x.rsi,macd:x.macd,sig:x.sig,tq:x.tq,gw:x.gw,tqd:x.tqd,gd:x.gd,y:x.y||null,pe:x.pe==null?null:x.pe,ks:x.ks||null,ue:x.ue||null,mk:x.mk||"S&P 500",ix:x.ix||[x.mk||"S&P 500"]}}).sort(function(a,b){return b.rsl-a.rsl})}
+ h:x.h||null,ht:x.ht||null,rsi:x.rsi,macd:x.macd,sig:x.sig,tq:x.tq,gw:x.gw,tqd:x.tqd,gd:x.gd,y:x.y||null,pe:x.pe==null?null:x.pe,ks:x.ks||null,ue:x.ue||null,mk:x.mk||"S&P 500",ix:x.ix||[x.mk||"S&P 500"]}}).sort(function(a,b){return b.rsl-a.rsl})}
 function getj(d){return fetch(DATADIR+d+".json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()})}
 function loadDate(d){CUR=d;var t=new Date(d+"T12:00:00");t.setDate(t.getDate()-7);var tg=t.toISOString().slice(0,10);var pd=IDX.find(function(x){return x<=tg});
- Promise.all([getj(d),pd?getj(pd).catch(function(){return null}):Promise.resolve(null)]).then(function(a){UPD=a[0].updated;PREVD=a[1]?mapRows(a[1]):[];D=mapRows(a[0]);render()}).catch(fallback)}
+ Promise.all([getj(d),pd?getj(pd).catch(function(){return null}):Promise.resolve(null)]).then(function(a){UPD=a[0].updated;PREVD=a[1]?mapRows(a[1]):[];PDATE=a[1]?pd:null;D=mapRows(a[0]);render()}).catch(fallback)}
 document.getElementById("dsel").onchange=function(){loadDate(this.value)};
 fetch(DATADIR+"index.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
  IDX=j.dates;var sel=document.getElementById("dsel");sel.innerHTML=j.dates.map(function(d,i){return'<option value="'+d+'">'+fd(nxt(d))+" – 10:00 Uhr (Schluss "+fd(new Date(d+"T12:00:00"))+")"+(i?"":" · aktuell")+"</option>"}).join("");
